@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "baseUrl": "./",
+        "rootDir": "./",
+        "module": "es2015",
+        "target": "esnext",
+        "noUnusedLocals": true,
+        "strict": true,
+        "noImplicitReturns": true,
+        "stripInternal": true,
+        "declaration": true,
+        "forceConsistentCasingInFileNames": true,
+        "pretty": true,
+        "skipLibCheck": true,
+        "sourceMap": true
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "lib",
+        "**/node_modules/*"
+    ]
+}

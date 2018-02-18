@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Unit Tests",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+            "preLaunchTask": "build:debug",
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceFolder}/lib/**/*.js"
+            ],
+            "skipFiles": [
+                "${workspaceFolder}/node_modules/**/*.js"
+            ],
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--runInBand"
+            ],
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "NODE_ENV": "test"
+            }
+        }
+    ]
+}

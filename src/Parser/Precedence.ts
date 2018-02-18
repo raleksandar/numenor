@@ -1,0 +1,20 @@
+export const Sequence = 1;
+export const Assignment = 2;
+export const Conditional = 3;
+export const LogicalOr = 4;
+export const LogicalAnd = 5;
+export const BitwiseOr = 6;
+export const BitwiseXor = 7;
+export const BitwiseAnd = 8;
+export const Equality = 9;
+export const Relational = 10;
+export const BitwiseShift = 11;
+export const Additive = 12;
+export const Multiplicative = 13;
+export const Power = 14;
+export const Prefix = 15;
+export const Postfix = 16;
+export const Primary = 17;
+export const Grouping = 18;
+
+export type Any = number;
