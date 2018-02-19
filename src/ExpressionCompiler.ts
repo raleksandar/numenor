@@ -1,7 +1,7 @@
 import { Compiler } from './Compiler';
 import { ExpressionType } from './Parser';
 import { Assignment } from './Compiler/Evaluator/Assignment';
-import { Identifier } from './Compiler/Evaluator/Identifier';
+import { Identifier, Register } from './Compiler/Evaluator/Identifier';
 import { ArrayLiteral } from './Compiler/Evaluator/ArrayLiteral';
 import { BinaryOperation } from './Compiler/Evaluator/BinaryOperation';
 import { Call } from './Compiler/Evaluator/Call';
@@ -23,6 +23,7 @@ export class ExpressionCompiler extends Compiler {
         this.setCompiler(ExpressionType.Call, Call);
         this.setCompiler(ExpressionType.Conditional, Conditional);
         this.setCompiler(ExpressionType.Identifier, Identifier);
+        this.setCompiler(ExpressionType.Register, Register);
         this.setCompiler(ExpressionType.MemberAccess, MemberAccess);
         this.setCompiler(ExpressionType.ComputedMemberAccess, ComputedMemberAccess);
         this.setCompiler(ExpressionType.ObjectLiteral, ObjectLiteral);
