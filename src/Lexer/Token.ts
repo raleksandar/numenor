@@ -114,7 +114,7 @@ export interface Plus extends Position {
     readonly type: typeof TokenType.Plus;
 }
 
-export interface PlusPlus extends Position {
+export interface PlusPlus extends Assignment {
     readonly type: typeof TokenType.PlusPlus;
 }
 
@@ -126,7 +126,7 @@ export interface Minus extends Position {
     readonly type: typeof TokenType.Minus;
 }
 
-export interface MinusMinus extends Position {
+export interface MinusMinus extends Assignment {
     readonly type: typeof TokenType.MinusMinus;
 }
 

@@ -176,7 +176,7 @@ export class Lexer {
                         }
                     } else if (ch === '+') {
                         if (match('+')) {
-                            token = {col, line, type: TokenType.PlusPlus};
+                            token = {col, line, type: TokenType.PlusPlus, operator: TokenType.Plus};
                         } else if (match('=')) {
                             token = {col, line, type: TokenType.PlusEq, operator: TokenType.Plus};
                         } else {
@@ -184,7 +184,7 @@ export class Lexer {
                         }
                     } else if (ch === '-') {
                         if (match('-')) {
-                            token = {col, line, type: TokenType.MinusMinus};
+                            token = {col, line, type: TokenType.MinusMinus, operator: TokenType.Minus};
                         } else if (match('=')) {
                             token = {col, line, type: TokenType.MinusEq, operator: TokenType.Minus};
                         } else {
