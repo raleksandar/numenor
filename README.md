@@ -1,4 +1,5 @@
 # numenor
+[![npm version](https://badge.fury.io/js/numenor.svg)](https://badge.fury.io/js/numenor)
 
 Customizable, safe evaluator of JavaScript-like expressions.
 
