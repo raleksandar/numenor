@@ -95,13 +95,22 @@ describe('ExpressionEvaluator', () => {
 
         const ctx = {
             baz: null,
+            a: {
+                b: {
+                    c: 123,
+                },
+            },
         };
 
         expect($eval('foo?.bar', ctx)).toBe(undefined);
         expect($eval('baz?.qux', ctx)).toBe(null);
+        expect($eval('a?.b?.c', ctx)).toBe(123);
     });
 
     it('Supports null-coalescing ?? operator', () => {
         expect($eval('foo ?? false')).toBe(false);
+        expect($eval('0 || true')).toBe(true);
+        expect($eval('0 ?? true')).toBe(0);
+        expect($eval('null ?? false')).toBe(false);
     });
 });
