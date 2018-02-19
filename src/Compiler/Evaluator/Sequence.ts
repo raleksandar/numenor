@@ -12,7 +12,7 @@ export function Sequence(expr: Expression.Any, options: CompilerOptions, compile
     const expressions = expr.expressions
         .map((e) => compile(e, options, compile))
         .filter((e, index, {length}) => {
-            return index < length - 1 && hasConstValue(e as Evaluator);
+            return index === length - 1 || !hasConstValue(e as Evaluator);
         });
 
     const {length} = expressions;
