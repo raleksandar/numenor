@@ -66,5 +66,42 @@ describe('ExpressionEvaluator', () => {
         expect((ctx as any).foo).toBe(123);
     });
 
+    it('Throws when accessing undefined variables with {NoUndefinedVars: true}', () => {
 
+        const ctx = {
+        };
+
+        expect(() => {
+            evaluator.evaluate('foo', ctx, {NoUndefinedVars: true});
+        }).toThrowError('foo is not defined');
+    });
+
+    it('Throws when accessing members of null/undefined value', () => {
+
+        const ctx = {
+            baz: null,
+        };
+
+        expect(() => {
+            $eval('foo.bar', ctx);
+        }).toThrowError('Cannot access property bar of undefined value');
+
+        expect(() => {
+            $eval('baz.qux', ctx);
+        }).toThrowError('Cannot access property qux of null value');
+    });
+
+    it('Does not throw when accessing members of null/undefined values via null-conditional ?. operator', () => {
+
+        const ctx = {
+            baz: null,
+        };
+
+        expect($eval('foo?.bar', ctx)).toBe(undefined);
+        expect($eval('baz?.qux', ctx)).toBe(null);
+    });
+
+    it('Supports null-coalescing ?? operator', () => {
+        expect($eval('foo ?? false')).toBe(false);
+    });
 });
