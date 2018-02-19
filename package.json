@@ -1,6 +1,6 @@
 {
   "name": "numenor",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Customizable, safe evaluator of JavaScript-like expressions.",
   "keywords": [
     "expression",
