@@ -6,7 +6,7 @@ import { makeBinaryOperatorParselet, RightAssociative } from './Parser/Parselet/
 import * as Precedence from './Parser/Precedence';
 import { Sequence } from './Parser/Parselet/Sequence';
 import { Conditional, NullCoalesce, NullConditional } from './Parser/Parselet/Conditional';
-import { makePrefixOperatorParselet, makePrefixAccessMutatorParselet } from './Parser/Parselet/UnaryOperator';
+import { makePrefixOperatorParselet, makePrefixAccessMutatorParselet, makePostfixAccessMutatorParselet } from './Parser/Parselet/UnaryOperator';
 import { MemberAccess, ComputedMemberAccess } from './Parser/Parselet/MemberAccess';
 import { Call } from './Parser/Parselet/Call';
 import { Group } from './Parser/Parselet/Group';
@@ -82,8 +82,8 @@ export class ExpressionParser extends Parser {
         this.setPrefix(TokenType.PlusPlus, makePrefixAccessMutatorParselet());
         this.setPrefix(TokenType.MinusMinus, makePrefixAccessMutatorParselet());
 
-        // this.setInfix(TokenType.PlusPlus, makePostfixOperatorParselet(TokenType.PlusPlus));
-        // this.setInfix(TokenType.MinusMinus, makePostfixOperatorParselet(TokenType.MinusMinus));
+        this.setInfix(TokenType.PlusPlus, makePostfixAccessMutatorParselet(TokenType.PlusPlus));
+        this.setInfix(TokenType.MinusMinus, makePostfixAccessMutatorParselet(TokenType.MinusMinus));
 
         this.setInfix(TokenType.Dot, MemberAccess);
         this.setInfix(TokenType.LBracket, ComputedMemberAccess);

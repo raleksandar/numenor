@@ -129,4 +129,20 @@ describe('ExpressionEvaluator', () => {
         expect(ctx.a).toBe(2);
         expect(ctx.b).toBe(-2);
     });
+
+    it('Supports postfix increment/decrement expressions', () => {
+
+        const ctx = {
+            a: 0,
+            b: 0,
+        };
+
+        expect($eval('a++', ctx)).toBe(0);
+        expect(ctx.a).toBe(1);
+        expect($eval('b--', ctx)).toBe(0);
+        expect(ctx.b).toBe(-1);
+        expect($eval('a++ * b--', ctx)).toBe(-1);
+        expect(ctx.a).toBe(2);
+        expect(ctx.b).toBe(-2);
+    });
 });

@@ -79,3 +79,57 @@ export function makePrefixAccessMutatorParselet(): Prefix {
         };
     };
 }
+
+export function makePostfixAccessMutatorParselet<T extends TokenType.BinaryOperator>(
+    operator: T,
+    precedence: Precedence = PostfixPrecedence,
+): Infix {
+
+    const parselet = (parser: Parser, lhs: Expr, token: Token.Any): Expr => {
+
+        if (!('operator' in token)) {
+            throw new SyntaxError(UnknownToken(token));
+        }
+
+        // a++ => (#0 = a, a = a + 1, #0)
+
+        if (lhs.type !== ExpressionType.Identifier &&
+            lhs.type !== ExpressionType.Register &&
+            lhs.type !== ExpressionType.MemberAccess &&
+            lhs.type !== ExpressionType.ComputedMemberAccess
+        ) {
+            throw new SyntaxError(InvalidLeftHandSide);
+        }
+
+        const register: Expr = {
+            type: ExpressionType.Register,
+            index: 0
+        };
+
+        return {
+            type: ExpressionType.Sequence,
+            expressions: [
+                {
+                    type: ExpressionType.Assignment,
+                    lhs: register,
+                    rhs: lhs,
+                }, {
+                    type: ExpressionType.Assignment,
+                    lhs,
+                    rhs: {
+                        type: ExpressionType.BinaryOperation,
+                        lhs,
+                        rhs: {
+                            type: ExpressionType.NumberLiteral,
+                            value: 1,
+                        },
+                        operator: token.operator,
+                    },
+                },
+                register,
+            ],
+        };
+    }
+
+    return makeInfix(parselet, precedence);
+}
