@@ -1,4 +1,4 @@
-import { InternalEvaluator, RegisterSet, EvaluatorContext } from './';
+import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator, evalConst, makeConstEval } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, CantInvoke } from '../Error';
@@ -10,10 +10,23 @@ export function Call(expr: Expression.Any, options: CompilerOptions, compile: Ev
     }
 
     const lhs = compile(expr.lhs, options, compile);
-    const args = expr.args.map((arg) => compile(arg, options, compile));
-    const length = args.length;
 
-    return (context: EvaluatorContext, registers: RegisterSet) => {
+    let isConst = hasConstValue(lhs as Evaluator);
+
+    const args = expr.args.map((argExpr) => {
+
+        const arg = compile(argExpr, options, compile);
+
+        if (isConst && !hasConstValue(arg as Evaluator)) {
+            isConst = false;
+        }
+
+        return arg;
+    });
+
+    const {length} = args;
+
+    const evaluator = (context: EvaluatorContext, registers: RegisterSet) => {
 
         const callee = lhs(context, registers);
 
@@ -29,4 +42,10 @@ export function Call(expr: Expression.Any, options: CompilerOptions, compile: Ev
 
         return callee(...params);
     };
+
+    if (isConst) {
+        return makeConstEval(evalConst(evaluator));
+    }
+
+    return evaluator;
 }

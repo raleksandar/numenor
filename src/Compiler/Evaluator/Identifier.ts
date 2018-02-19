@@ -1,4 +1,4 @@
-import { InternalEvaluator, EvaluatorContext, RegisterSet } from './';
+import { InternalEvaluator, EvaluatorContext, RegisterSet, makeConstEval } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, UndefinedIdentifier } from '../Error';
@@ -15,6 +15,10 @@ export function Identifier(expr: Expression.Any, options: CompilerOptions, compi
     }
 
     const {name} = expr;
+
+    if (options.Constants && contains(options.Constants, name)) {
+        return makeConstEval(options.Constants[name]);
+    }
 
     if (options.NoUndefinedVars) {
         return (context: EvaluatorContext) => {

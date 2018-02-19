@@ -145,4 +145,37 @@ describe('ExpressionEvaluator', () => {
         expect(ctx.a).toBe(2);
         expect(ctx.b).toBe(-2);
     });
+
+    it('Supports compile-time constants defined in {Constants: {}}', () => {
+
+        let expr = evaluator.compile('a * b', {
+            Constants: {
+                a: 123,
+                b: 2,
+            },
+        });
+        expect(expr()).toBe(246);
+
+        expr = evaluator.compile('(a.b * c.d[a.i]) ** 2', {
+            Constants: {
+                a: {
+                    b: 2,
+                    i: 1,
+                },
+                c: {
+                    d: [1, 2, 3],
+                }
+            }
+        });
+        expect(expr()).toBe(16); // (2 * 2) ** 2
+    });
+
+    it('Supports compile-time function evaluation via {Constants: {}}', () => {
+        const expr = evaluator.compile('square(square(0x10))', {
+            Constants: {
+                square: (x: number) => x * x,
+            },
+        });
+        expect(expr()).toBe(0x10000);
+    });
 });

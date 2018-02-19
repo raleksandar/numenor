@@ -6,6 +6,9 @@ export interface CompilerOptions {
     NoUndefinedVars?: boolean;
     NoNewVars?: boolean;
     ImmutableContext?: boolean;
+    Constants?: {
+        [name: string]: any;
+    };
 }
 
 export interface EvaluatorFactory {
@@ -16,6 +19,7 @@ const DefaultOptions: CompilerOptions = {
     NoUndefinedVars: false,
     NoNewVars: false,
     ImmutableContext: false,
+    Constants: Object.create(null),
 };
 
 export abstract class Compiler {
