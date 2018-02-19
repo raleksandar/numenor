@@ -3,9 +3,9 @@ import { Evaluator, InternalEvaluator, hasConstValue, EvaluatorContext, EmptyCon
 import * as Error from './Error';
 
 export interface CompilerOptions {
-    NoUndefinedVars: boolean;
-    NoNewVars: boolean;
-    ImmutableContext: boolean;
+    NoUndefinedVars?: boolean;
+    NoNewVars?: boolean;
+    ImmutableContext?: boolean;
 }
 
 export interface EvaluatorFactory {
