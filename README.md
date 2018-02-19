@@ -20,7 +20,7 @@ import { ExpressionEvaluator } from 'numenor';
 
 const evaluator = new ExpressionEvaluator();
 
-evaluator.eval('2 + 2 / 2'); // -> 3
+evaluator.evaluate('2 + 2 / 2'); // -> 3
 ```
 
 ### API
