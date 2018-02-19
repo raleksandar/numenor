@@ -3,11 +3,11 @@ import { Evaluator, InternalEvaluator, hasConstValue, EvaluatorContext, EmptyCon
 import * as Error from './Error';
 
 export interface CompilerOptions {
-    NoUndefinedVars?: boolean;
-    NoNewVars?: boolean;
-    ImmutableContext?: boolean;
-    Constants?: {
-        [name: string]: any;
+    NoUndefinedVars?: boolean;  // throws if referencing variable not defined in the context
+    NoNewVars?: boolean;        // throws if assigning a value to the variable not defined in context
+    ImmutableContext?: boolean; // throws if trying to use any assignment operation
+    Constants?: {               // compile-time constants to use
+        [name: string]: any;    // if a constant has function type it is eligible for CTFE
     };
 }
 
