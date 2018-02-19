@@ -1,4 +1,4 @@
-import { InternalEvaluator, EvaluatorContext, RegisterSet } from './';
+import { InternalEvaluator, EvaluatorContext, RegisterSet, ConstValue, hasConstValue, Evaluator } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import {
@@ -28,9 +28,13 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
     if (expr.lhs.type === ExpressionType.Register) {
 
         const {index} = expr.lhs;
+        const isConst = hasConstValue(rhs as Evaluator);
 
         return (context: EvaluatorContext, registers: RegisterSet) => {
-            return registers[index] = rhs(context, registers);
+            return registers[index] = {
+                value: rhs(context, registers),
+                [ConstValue]: isConst,
+            };
         };
     }
 
