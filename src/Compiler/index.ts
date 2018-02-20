@@ -6,6 +6,7 @@ export interface CompilerOptions {
     NoUndefinedVars?: boolean;  // throws if referencing variable not defined in the context
     NoNewVars?: boolean;        // throws if assigning a value to the variable not defined in context
     ImmutableContext?: boolean; // throws if trying to use any assignment operation
+    NoProtoAccess?: boolean;    // disallows accessing or traversing of prototype chain
     Constants?: {               // compile-time constants to use
         [name: string]: any;    // if a constant has function type it is eligible for CTFE
     };
@@ -19,6 +20,7 @@ const DefaultOptions: CompilerOptions = {
     NoUndefinedVars: false,
     NoNewVars: false,
     ImmutableContext: false,
+    NoProtoAccess: true,
     Constants: Object.create(null),
 };
 

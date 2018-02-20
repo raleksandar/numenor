@@ -17,5 +17,6 @@ export const CannotAccessProperty = (value: any, name?: string) => (
     `Cannot access property ${name ? name + ' ' : ''}of ${value} value`
 );
 
+export const CannotAccessProto = `Cannot access __proto__ member`;
 export const CantInvoke = `Cannot invoke non-function values`;
 export const ImmutableContext = `Cannot mutate context`;

@@ -1,4 +1,4 @@
-import { InternalEvaluator, EvaluatorContext, RegisterSet, ConstValue, hasConstValue, Evaluator } from './';
+import { InternalEvaluator, EvaluatorContext, RegisterSet, ConstValue, hasConstValue, Evaluator, makeConstEval, evalConst, markAsConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import {
@@ -7,11 +7,7 @@ import {
     ImmutableContext,
     CannotAccessProperty
 } from '../Error';
-
-const hasOwnProp = Object.prototype.hasOwnProperty;
-const contains = (object: any, member: string): boolean => {
-    return hasOwnProp.call(object, member);
-};
+import { hasOwnProp, hasProtoProp } from './util';
 
 export function Assignment(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
 
@@ -20,7 +16,7 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
     }
 
     if (options.ImmutableContext && expr.lhs.type !== ExpressionType.Register) {
-        return () => { throw new TypeError(ImmutableContext); };
+        return markAsConst(() => { throw new TypeError(ImmutableContext); });
     }
 
     const rhs = compile(expr.rhs, options, compile);
@@ -38,17 +34,24 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
         };
     }
 
+    const contains = options.NoProtoAccess ? hasOwnProp : hasProtoProp;
+    const isConst = options.Constants && hasConstValue(rhs as Evaluator);
+
     if (expr.lhs.type === ExpressionType.Identifier) {
 
         const {name} = expr.lhs;
 
         if (options.NoNewVars) {
             return (context: EvaluatorContext, registers: RegisterSet) => {
-                if (!contains(context, name)) {
+                if (!hasOwnProp(context, name)) {
                     throw new ReferenceError(UndefinedIdentifier(name));
                 }
                 return context[name] = rhs(context, registers);
             };
+        }
+
+        if (isConst && contains(options.Constants!, name)) {
+            return makeConstEval(options.Constants![name] = evalConst(rhs));
         }
 
         return (context: EvaluatorContext, registers: RegisterSet) => {
@@ -60,6 +63,10 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
 
         const {name} = expr.lhs;
         const lhs = compile(expr.lhs.lhs, options, compile);
+
+        if (isConst && hasConstValue(lhs as Evaluator)) {
+            return makeConstEval(evalConst(lhs)[name] = evalConst(rhs));
+        }
 
         return (context: EvaluatorContext, registers: RegisterSet) => {
 
@@ -77,6 +84,10 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
 
         const lhs = compile(expr.lhs.lhs, options, compile);
         const prop = compile(expr.lhs.rhs, options, compile);
+
+        if (isConst && hasConstValue(lhs as Evaluator) && hasConstValue(prop as Evaluator)) {
+            return makeConstEval(evalConst(lhs)[evalConst(prop)] = evalConst(rhs));
+        }
 
         return (context: EvaluatorContext, registers: RegisterSet) => {
 

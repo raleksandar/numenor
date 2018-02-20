@@ -1,5 +1,6 @@
 import { ExpressionEvaluator } from '../';
 import { EvaluatorContext } from '../Compiler/Evaluator';
+import { CompilerOptions } from '../Compiler';
 
 
 describe('ExpressionEvaluator', () => {
@@ -7,6 +8,9 @@ describe('ExpressionEvaluator', () => {
     const evaluator = new ExpressionEvaluator();
     const $eval = (expr: string, context?: EvaluatorContext) => {
         return evaluator.evaluate(expr, context);
+    };
+    const $compile = (expr: string, options?: CompilerOptions) => {
+        return evaluator.compile(expr, options);
     };
 
     it('Evaluates number expression', () => {
@@ -148,7 +152,7 @@ describe('ExpressionEvaluator', () => {
 
     it('Supports compile-time constants defined in {Constants: {}}', () => {
 
-        let expr = evaluator.compile('a * b', {
+        let expr = $compile('a * b', {
             Constants: {
                 a: 123,
                 b: 2,
@@ -156,7 +160,7 @@ describe('ExpressionEvaluator', () => {
         });
         expect(expr()).toBe(246);
 
-        expr = evaluator.compile('(a.b * c.d[a.i]) ** 2', {
+        expr = $compile('(a.b * c.d[a.i]) ** 2', {
             Constants: {
                 a: {
                     b: 2,
@@ -171,11 +175,53 @@ describe('ExpressionEvaluator', () => {
     });
 
     it('Supports compile-time function evaluation via {Constants: {}}', () => {
-        const expr = evaluator.compile('square(square(0x10))', {
+        const expr = $compile('square(square(0x10))', {
             Constants: {
                 square: (x: number) => x * x,
             },
         });
         expect(expr()).toBe(0x10000);
+    });
+
+    it('Throws when accessing __proto__ member', () => {
+        expect(() => {
+            $eval('__proto__');
+        }).toThrowError('Cannot access __proto__ member');
+        expect(() => {
+            $eval('a.__proto__', {a: []});
+        }).toThrowError('Cannot access __proto__ member');
+        expect(() => {
+            $eval('a["__pr" + "oto__"]', {a: []});
+        }).toThrowError('Cannot access __proto__ member');
+    });
+
+    it('Does not traverse prototype chain by default', () => {
+
+        const ctx = {};
+        Object.setPrototypeOf(ctx, {
+            a: 123,
+        });
+
+        expect($eval('a', ctx)).toBe(undefined);
+        expect($eval('[1,2,3].indexOf')).toBe(undefined);
+
+        expect(() => {
+            // need to turn on NoNewVars or this will set `a` directly on `ctx` otherwise
+            $compile('a = 123', {NoNewVars: true})(ctx);
+        }).toThrowError('a is not defined');
+    });
+
+    it('Traverses prototype chain with {NoProtoAccess: false}', () => {
+
+        const ctx = {};
+        const proto = {a: 123};
+        Object.setPrototypeOf(ctx, proto);
+
+        expect($compile('a', {NoProtoAccess: false})(ctx)).toBe(123);
+        expect($compile('[1,2,3].indexOf', {NoProtoAccess: false})()).toBeInstanceOf(Function);
+        expect(() => {
+            // this still needs to fail as {NoProtoAccess: false} only allows *read* access
+            $compile('a = 123', {NoNewVars: true, NoProtoAccess: false})(ctx);
+        }).toThrowError('a is not defined');
     });
 });

@@ -1,7 +1,8 @@
-import { InternalEvaluator, EvaluatorContext, RegisterSet, hasConstValue, Evaluator, evalConst, makeConstEval } from './';
+import { InternalEvaluator, EvaluatorContext, RegisterSet, hasConstValue, Evaluator, evalConst, makeConstEval, markAsConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
-import { UnknownExpression, CannotAccessProperty } from '../Error';
+import { UnknownExpression, CannotAccessProperty, CannotAccessProto } from '../Error';
+import { ownPropGetter, protoPropGetter } from './util';
 
 export function MemberAccess(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
 
@@ -12,6 +13,12 @@ export function MemberAccess(expr: Expression.Any, options: CompilerOptions, com
     const lhs = compile(expr.lhs, options, compile);
     const {name} = expr;
 
+    if (name === '__proto__') {
+        return markAsConst(() => { throw new TypeError(CannotAccessProto); });
+    }
+
+    const get = options.NoProtoAccess ? ownPropGetter : protoPropGetter;
+
     const evaluator = (context: EvaluatorContext, registers: RegisterSet) => {
 
         const object = lhs(context, registers);
@@ -20,7 +27,7 @@ export function MemberAccess(expr: Expression.Any, options: CompilerOptions, com
             throw new TypeError(CannotAccessProperty(object, name));
         }
 
-        return object[name];
+        return get(object, name);
     };
 
     if (hasConstValue(lhs as Evaluator)) {
@@ -39,6 +46,8 @@ export function ComputedMemberAccess(expr: Expression.Any, options: CompilerOpti
     const lhs = compile(expr.lhs, options, compile);
     const rhs = compile(expr.rhs, options, compile);
 
+    const get = options.NoProtoAccess ? ownPropGetter : protoPropGetter;
+
     const evaluator = (context: EvaluatorContext, registers: RegisterSet) => {
 
         const object = lhs(context, registers);
@@ -49,7 +58,11 @@ export function ComputedMemberAccess(expr: Expression.Any, options: CompilerOpti
 
         const name = rhs(context, registers);
 
-        return object[name];
+        if (name === '__proto__') {
+            throw new TypeError(CannotAccessProto);
+        }
+
+        return get(object, name);
     };
 
     if (hasConstValue(lhs as Evaluator) && hasConstValue(rhs as Evaluator)) {

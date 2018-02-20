@@ -27,10 +27,13 @@ export function hasConstValue(object: Evaluator | Register): boolean {
     return object[ConstValue] === true;
 }
 
-export function makeConstEval(value: any): Evaluator {
-    const evaluator: Evaluator = () => value;
+export function markAsConst(evaluator: Evaluator): Evaluator {
     evaluator[ConstValue] = true;
     return evaluator;
+}
+
+export function makeConstEval(value: any): Evaluator {
+    return markAsConst(() => value);
 }
 
 export const EmptyContext: EvaluatorContext = Object.create(null);
