@@ -2,7 +2,7 @@ import { InternalEvaluator, EvaluatorContext, Stack, hasConstValue, Evaluator, m
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, CannotAccessProperty, CannotAccessProto } from '../Error';
-import { ownPropGetter, protoPropGetter } from './util';
+import { ownPropGetter, protoPropGetter, bindFunction } from './util';
 
 export function MemberAccess(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
 
@@ -27,7 +27,13 @@ export function MemberAccess(expr: Expression.Any, options: CompilerOptions, com
             throw new TypeError(CannotAccessProperty(object, name));
         }
 
-        return get(object, name);
+        const value = get(object, name);
+
+        if (typeof value === 'function') {
+            return bindFunction(value, object);
+        }
+
+        return value;
     };
 
     if (hasConstValue(lhs as Evaluator)) {
@@ -62,7 +68,13 @@ export function ComputedMemberAccess(expr: Expression.Any, options: CompilerOpti
             throw new TypeError(CannotAccessProto);
         }
 
-        return get(object, name);
+        const value = get(object, name);
+
+        if (typeof value === 'function') {
+            return bindFunction(value, object);
+        }
+
+        return value;
     };
 
     if (hasConstValue(lhs as Evaluator) && hasConstValue(rhs as Evaluator)) {

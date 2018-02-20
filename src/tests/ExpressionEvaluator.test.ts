@@ -224,4 +224,28 @@ describe('ExpressionEvaluator', () => {
             $compile('a = 123', {NoNewVars: true, NoProtoAccess: false})(ctx);
         }).toThrowError('a is not defined');
     });
+
+    it('Invokes functions with correct thisArg', () => {
+
+        const ctx = {
+            x: 123,
+            fn: function(m: number) {
+                return this.x * m;
+            },
+            o: {
+                m: 2,
+                fn: function(...params: number[]) {
+                    let sum = 0;
+                    for (const x of params) {
+                        sum += x;
+                    }
+                    return sum * this.m;
+                }
+            }
+        };
+
+        expect($eval('fn(2)', ctx)).toBe(246);
+        expect($eval('o.fn(2, 4, 6, 8)', ctx)).toBe(40);
+        expect($compile('[1,2,3,4,5,6].map(fn).indexOf(246)', {NoProtoAccess:false})(ctx)).toBe(1);
+    });
 });

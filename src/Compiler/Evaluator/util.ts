@@ -1,5 +1,6 @@
 
 const ownProp = Object.prototype.hasOwnProperty;
+const bind = Function.prototype.bind;
 
 export type PropQuery = (obj: {}, prop: string) => boolean;
 export type Getter = (obj: {[name: string]: any}, prop: string) => any;
@@ -18,4 +19,8 @@ export const protoPropGetter: Getter = (obj, prop) => {
 
 export const ownPropGetter: Getter = (obj, prop) => {
     return hasOwnProp(obj, prop) ? obj[prop] : undefined;
+};
+
+export function bindFunction(fn: () => any, thisArg: any): () => any {
+    return bind.call(fn, thisArg);
 };

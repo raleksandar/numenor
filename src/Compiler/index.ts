@@ -1,5 +1,5 @@
 import { Expression, ExpressionType } from '../Parser';
-import { Evaluator, InternalEvaluator, hasConstValue, EvaluatorContext, EmptyContext } from './Evaluator';
+import { Evaluator, InternalEvaluator, EvaluatorContext, EmptyContext } from './Evaluator';
 import * as Error from './Error';
 
 export interface CompilerOptions {
@@ -47,10 +47,6 @@ export abstract class Compiler {
 
         const compileOptions = {...DefaultOptions, ...options};
         const evaluator = compile(expression, compileOptions, compile);
-
-        if (hasConstValue(evaluator as Evaluator)) {
-            return evaluator as Evaluator;
-        }
 
         return (context?: EvaluatorContext) => {
             return evaluator(context || EmptyContext, []);
