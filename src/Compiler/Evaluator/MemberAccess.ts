@@ -1,4 +1,4 @@
-import { InternalEvaluator, EvaluatorContext, RegisterSet, hasConstValue, Evaluator, evalConst, makeConstEval, markAsConst } from './';
+import { InternalEvaluator, EvaluatorContext, RegisterSet, hasConstValue, Evaluator, markAsConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, CannotAccessProperty, CannotAccessProto } from '../Error';
@@ -31,7 +31,7 @@ export function MemberAccess(expr: Expression.Any, options: CompilerOptions, com
     };
 
     if (hasConstValue(lhs as Evaluator)) {
-        return makeConstEval(evalConst(evaluator));
+        return markAsConst(evaluator);
     }
 
     return evaluator;
@@ -66,7 +66,7 @@ export function ComputedMemberAccess(expr: Expression.Any, options: CompilerOpti
     };
 
     if (hasConstValue(lhs as Evaluator) && hasConstValue(rhs as Evaluator)) {
-        return makeConstEval(evalConst(evaluator));
+        return markAsConst(evaluator);
     }
 
     return evaluator;

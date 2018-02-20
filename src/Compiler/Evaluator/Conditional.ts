@@ -1,4 +1,4 @@
-import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator, evalConst, makeConstEval } from './';
+import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator, evalConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
@@ -14,17 +14,7 @@ export function Conditional(expr: Expression.Any, options: CompilerOptions, comp
     const elseBranch = compile(expr.elseBranch, options, compile);
 
     if (hasConstValue(lhs as Evaluator)) {
-        if (evalConst(lhs)) {
-            if (hasConstValue(thenBranch as Evaluator)) {
-                return makeConstEval(evalConst(thenBranch));
-            } else {
-                return thenBranch;
-            }
-        } else if (hasConstValue(elseBranch as Evaluator)) {
-            return makeConstEval(evalConst(elseBranch));
-        } else {
-            return elseBranch;
-        }
+        return evalConst(lhs) ? thenBranch : elseBranch;
     }
 
     return (context: EvaluatorContext, registers: RegisterSet) => {

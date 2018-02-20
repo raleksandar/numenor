@@ -1,4 +1,4 @@
-import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator, evalConst, makeConstEval } from './';
+import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
@@ -17,8 +17,8 @@ export function Sequence(expr: Expression.Any, options: CompilerOptions, compile
 
     const {length} = expressions;
 
-    if (length === 1 && hasConstValue(expressions[length - 1] as Evaluator)) {
-        return makeConstEval(evalConst);
+    if (length === 1) {
+        return expressions[length - 1];
     }
 
     return (context: EvaluatorContext) => {

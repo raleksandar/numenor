@@ -1,4 +1,4 @@
-import { InternalEvaluator, makeConstEval, hasConstValue, Evaluator, evalConst } from './';
+import { InternalEvaluator, hasConstValue, Evaluator, markAsConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
@@ -42,7 +42,7 @@ export function PrefixOperation(expr: Expression.Any, options: CompilerOptions, 
 function maybeConst(rhs: InternalEvaluator, evaluator: InternalEvaluator): InternalEvaluator {
 
     if (hasConstValue(rhs as Evaluator)) {
-        return makeConstEval(evalConst(evaluator));
+        return markAsConst(evaluator);
     }
 
     return evaluator;

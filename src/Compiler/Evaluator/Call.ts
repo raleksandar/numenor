@@ -1,4 +1,4 @@
-import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator, evalConst, makeConstEval } from './';
+import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator, markAsConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, CantInvoke } from '../Error';
@@ -44,7 +44,7 @@ export function Call(expr: Expression.Any, options: CompilerOptions, compile: Ev
     };
 
     if (isConst) {
-        return makeConstEval(evalConst(evaluator));
+        return markAsConst(evaluator);
     }
 
     return evaluator;

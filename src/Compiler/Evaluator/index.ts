@@ -27,9 +27,9 @@ export function hasConstValue(object: Evaluator | Register): boolean {
     return object[ConstValue] === true;
 }
 
-export function markAsConst(evaluator: Evaluator): Evaluator {
+export function markAsConst(evaluator: Evaluator | InternalEvaluator): Evaluator {
     evaluator[ConstValue] = true;
-    return evaluator;
+    return evaluator as Evaluator;
 }
 
 export function makeConstEval(value: any): Evaluator {

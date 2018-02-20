@@ -64,11 +64,7 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
         const {name} = expr.lhs;
         const lhs = compile(expr.lhs.lhs, options, compile);
 
-        if (isConst && hasConstValue(lhs as Evaluator)) {
-            return makeConstEval(evalConst(lhs)[name] = evalConst(rhs));
-        }
-
-        return (context: EvaluatorContext, registers: RegisterSet) => {
+        const evaluator = (context: EvaluatorContext, registers: RegisterSet) => {
 
             const object = lhs(context, registers);
 
@@ -78,6 +74,12 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
 
             return object[name] = rhs(context, registers);
         };
+
+        if (isConst && hasConstValue(lhs as Evaluator)) {
+            return markAsConst(evaluator);
+        }
+
+        return evaluator;
     }
 
     if (expr.lhs.type === ExpressionType.ComputedMemberAccess) {
@@ -85,11 +87,7 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
         const lhs = compile(expr.lhs.lhs, options, compile);
         const prop = compile(expr.lhs.rhs, options, compile);
 
-        if (isConst && hasConstValue(lhs as Evaluator) && hasConstValue(prop as Evaluator)) {
-            return makeConstEval(evalConst(lhs)[evalConst(prop)] = evalConst(rhs));
-        }
-
-        return (context: EvaluatorContext, registers: RegisterSet) => {
+        const evaluator = (context: EvaluatorContext, registers: RegisterSet) => {
 
             const object = lhs(context, registers);
 
@@ -99,6 +97,12 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
 
             return object[prop(context, registers)] = rhs(context, registers);
         };
+
+        if (isConst && hasConstValue(lhs as Evaluator) && hasConstValue(prop as Evaluator)) {
+            return markAsConst(evaluator);
+        }
+
+        return evaluator;
     }
 
     throw new TypeError(UnknownExpression(expr.lhs));
