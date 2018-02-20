@@ -15,7 +15,6 @@ export function makeAssignmentParselet<T extends TokenType.Any>(operator: T): In
         }
 
         if (lhs.type !== ExpressionType.Identifier &&
-            lhs.type !== ExpressionType.Register &&
             lhs.type !== ExpressionType.MemberAccess &&
             lhs.type !== ExpressionType.ComputedMemberAccess
         ) {
@@ -25,7 +24,7 @@ export function makeAssignmentParselet<T extends TokenType.Any>(operator: T): In
         let rhs: Expr;
 
         if (operator === TokenType.QuestionQuestion) {
-            // a ??= b => a = a ?? b => a = (#0 = a, a != null ? #0 : b)
+            // a ??= b => a = a ?? b => a = (#push(a), #ref(1) != null ? #pop() : (#pop(), b))
             rhs = NullCoalesce(parser, lhs, {
                 type: TokenType.QuestionQuestion,
                 line: token.line,

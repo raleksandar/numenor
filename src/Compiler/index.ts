@@ -1,5 +1,5 @@
 import { Expression, ExpressionType } from '../Parser';
-import { Evaluator, InternalEvaluator, hasConstValue, EvaluatorContext, EmptyContext, RootRegisters } from './Evaluator';
+import { Evaluator, InternalEvaluator, hasConstValue, EvaluatorContext, EmptyContext } from './Evaluator';
 import * as Error from './Error';
 
 export interface CompilerOptions {
@@ -53,7 +53,7 @@ export abstract class Compiler {
         }
 
         return (context?: EvaluatorContext) => {
-            return evaluator(context || EmptyContext, RootRegisters);
+            return evaluator(context || EmptyContext, []);
         };
     }
 }

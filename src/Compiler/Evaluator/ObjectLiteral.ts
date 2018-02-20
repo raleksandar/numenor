@@ -5,7 +5,7 @@ import {
     makeConstEval,
     evalConst,
     EvaluatorContext,
-    RegisterSet
+    Stack
 } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
@@ -49,7 +49,7 @@ export function ObjectLiteral(expr: Expression.Any, options: CompilerOptions, co
 
     const length = items.length;
 
-    return (context: EvaluatorContext, registers: RegisterSet) => {
+    return (context: EvaluatorContext, stack: Stack) => {
 
         const object = Object.create(null);
 
@@ -59,10 +59,10 @@ export function ObjectLiteral(expr: Expression.Any, options: CompilerOptions, co
             let itemName = name;
 
             if (typeof name === 'function') {
-                itemName = name(context, registers);
+                itemName = name(context, stack);
             }
 
-            object[itemName] = value(context, registers);
+            object[itemName] = value(context, stack);
         }
 
         return object;

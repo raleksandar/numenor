@@ -1,5 +1,7 @@
 export const Identifier = Symbol('IdentifierExpression');
-export const Register = Symbol('RegisterExpression');
+export const StackPush = Symbol('StackPushExpression');
+export const StackPop = Symbol('StackPopExpression');
+export const StackRef = Symbol('StackRefExpression');
 export const NumberLiteral = Symbol('NumberLiteralExpression');
 export const StringLiteral = Symbol('StringLiteralExpression');
 export const BooleanLiteral = Symbol('BooleanLiteralExpression');
@@ -23,9 +25,13 @@ export type Value = typeof NumberLiteral
     | typeof NullLiteral
     | typeof UndefinedLiteral;
 
+export type StackOperation = typeof StackPush
+    | typeof StackPop
+    | typeof StackRef;
+
 export type Primary = Value
+    | StackOperation
     | typeof Identifier
-    | typeof Register
     | typeof ArrayLiteral
     | typeof ObjectLiteral
     | typeof Call

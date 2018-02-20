@@ -31,14 +31,23 @@ export interface Identifier {
     readonly name: string;
 }
 
-export interface Register {
-    readonly type: typeof ExpressionType.Register;
-    readonly index: number;
+export interface StackPush {
+    readonly type: typeof ExpressionType.StackPush;
+    readonly rhs: Any;
+}
+
+export interface StackPop {
+    readonly type: typeof ExpressionType.StackPop;
+}
+
+export interface StackRef {
+    readonly type: typeof ExpressionType.StackRef;
+    readonly offset: number;
 }
 
 export interface Assignment {
     readonly type: typeof ExpressionType.Assignment;
-    readonly lhs: Identifier | Register | MemberAccess | ComputedMemberAccess;
+    readonly lhs: Identifier | MemberAccess | ComputedMemberAccess;
     readonly rhs: Any;
 }
 
@@ -114,7 +123,9 @@ export type Value = Number
 
 export type Primary = Value
     | Identifier
-    | Register
+    | StackPop
+    | StackPush
+    | StackRef
     | Array
     | Object
     | Call

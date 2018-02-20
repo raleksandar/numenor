@@ -13,26 +13,26 @@ export function PrefixOperation(expr: Expression.Any, options: CompilerOptions, 
     const rhs = compile(expr.rhs, options, compile);
 
     if (expr.operator === TokenType.Bang) {
-        return maybeConst(rhs, (context, registers) => {
-            return !rhs(context, registers);
+        return maybeConst(rhs, (context, stack) => {
+            return !rhs(context, stack);
         });
     }
 
     if (expr.operator === TokenType.Tilde) {
-        return maybeConst(rhs, (context, registers) => {
-            return ~rhs(context, registers);
+        return maybeConst(rhs, (context, stack) => {
+            return ~rhs(context, stack);
         });
     }
 
     if (expr.operator === TokenType.Plus) {
-        return maybeConst(rhs, (context, registers) => {
-            return +rhs(context, registers);
+        return maybeConst(rhs, (context, stack) => {
+            return +rhs(context, stack);
         });
     }
 
     if (expr.operator === TokenType.Minus) {
-        return maybeConst(rhs, (context, registers) => {
-            return -rhs(context, registers);
+        return maybeConst(rhs, (context, stack) => {
+            return -rhs(context, stack);
         });
     }
 

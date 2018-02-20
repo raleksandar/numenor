@@ -1,4 +1,4 @@
-import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator } from './';
+import { InternalEvaluator, Stack, EvaluatorContext, hasConstValue, Evaluator } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
@@ -21,14 +21,12 @@ export function Sequence(expr: Expression.Any, options: CompilerOptions, compile
         return expressions[length - 1];
     }
 
-    return (context: EvaluatorContext) => {
-
-        const registers: RegisterSet = [];
+    return (context: EvaluatorContext, stack: Stack) => {
 
         let value: any;
 
         for (let i = 0; i < length; i++) {
-            value = expressions[i](context, registers);
+            value = expressions[i](context, stack);
         }
 
         return value;

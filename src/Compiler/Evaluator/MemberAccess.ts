@@ -1,4 +1,4 @@
-import { InternalEvaluator, EvaluatorContext, RegisterSet, hasConstValue, Evaluator, markAsConst } from './';
+import { InternalEvaluator, EvaluatorContext, Stack, hasConstValue, Evaluator, markAsConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, CannotAccessProperty, CannotAccessProto } from '../Error';
@@ -19,9 +19,9 @@ export function MemberAccess(expr: Expression.Any, options: CompilerOptions, com
 
     const get = options.NoProtoAccess ? ownPropGetter : protoPropGetter;
 
-    const evaluator = (context: EvaluatorContext, registers: RegisterSet) => {
+    const evaluator = (context: EvaluatorContext, stack: Stack) => {
 
-        const object = lhs(context, registers);
+        const object = lhs(context, stack);
 
         if (object === null || typeof object !== 'object') {
             throw new TypeError(CannotAccessProperty(object, name));
@@ -48,15 +48,15 @@ export function ComputedMemberAccess(expr: Expression.Any, options: CompilerOpti
 
     const get = options.NoProtoAccess ? ownPropGetter : protoPropGetter;
 
-    const evaluator = (context: EvaluatorContext, registers: RegisterSet) => {
+    const evaluator = (context: EvaluatorContext, stack: Stack) => {
 
-        const object = lhs(context, registers);
+        const object = lhs(context, stack);
 
         if (object === null || typeof object !== 'object') {
             throw new TypeError(CannotAccessProperty(object));
         }
 
-        const name = rhs(context, registers);
+        const name = rhs(context, stack);
 
         if (name === '__proto__') {
             throw new TypeError(CannotAccessProto);

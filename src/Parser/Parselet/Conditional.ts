@@ -35,29 +35,33 @@ function coalesce(parser: Parser, lhs: Expr, token: Token.Any): Expr {
         throw new SyntaxError(UnknownToken(token));
     }
 
-    // a ?? b => (#0 = a, #0 != null ? #0 : b)
+    // a ?? b => (#push(a), #ref(1) != null ? #pop() : (#pop(), b))
 
     const elseBranch = parser.parse(ConditionalPrecedence - 1);
 
-    const register: Expr = {
-        type: ExpressionType.Register,
-        index: 0,
+    const pop: Expr = {
+        type: ExpressionType.StackPop,
     };
 
     return {
         type: ExpressionType.Sequence,
         expressions: [{
-            type: ExpressionType.Assignment,
-            lhs: register,
+            type: ExpressionType.StackPush,
             rhs: lhs,
         }, {
             type: ExpressionType.Conditional,
-            thenBranch: register,
-            elseBranch,
+            thenBranch: pop,
+            elseBranch: {
+                type: ExpressionType.Sequence,
+                expressions: [pop, elseBranch],
+            },
             lhs: {
                 type: ExpressionType.BinaryOperation,
                 operator: TokenType.BangEq,
-                lhs: register,
+                lhs: {
+                    type: ExpressionType.StackRef,
+                    offset: 1,
+                },
                 rhs: {
                     type: ExpressionType.NullLiteral,
                     value: null,
@@ -75,44 +79,45 @@ function access(parser: Parser, lhs: Expr, token: Token.Any): Expr {
         throw new SyntaxError(UnknownToken(token));
     }
 
-    // a?.b => (#0 = a, #0 != null ? #0.b : #0)
-    // a?.[b] => (#0 = a, #0 != null ? #0[b] : #0)
-    // a?.(b) => (#0 = a, #0 != null ? #0(b) : #0)
+    // a?.b => (#push(a), #ref(1) != null ? #pop().b : #pop())
+    // a?.[b] => (#push(a), #ref(1) != null ? #pop()[b] : #pop())
+    // a?.(b) => (#push(a), #ref(1) != null ? #pop()(b) : #pop())
 
-    const register: Expr = {
-        type: ExpressionType.Register,
-        index: 0,
+    const pop: Expr = {
+        type: ExpressionType.StackPop,
     };
 
     let thenBranch: Expr;
 
     if (parser.match(TokenType.LBracket)) {
-        thenBranch = ComputedMemberAccess(parser, register, parser.shift());
+        thenBranch = ComputedMemberAccess(parser, pop, parser.shift());
     } else if (parser.match(TokenType.LParen)) {
-        thenBranch = Call(parser, register, parser.shift());
+        thenBranch = Call(parser, pop, parser.shift());
     } else {
         const dot: Token.Dot = {
             type: TokenType.Dot,
             line: token.line,
             col: token.col,
         };
-        thenBranch = MemberAccess(parser, register, dot);
+        thenBranch = MemberAccess(parser, pop, dot);
     }
 
     return {
         type: ExpressionType.Sequence,
         expressions: [{
-            type: ExpressionType.Assignment,
-            lhs: register,
+            type: ExpressionType.StackPush,
             rhs: lhs,
         }, {
             type: ExpressionType.Conditional,
             thenBranch,
-            elseBranch: register,
+            elseBranch: pop,
             lhs: {
                 type: ExpressionType.BinaryOperation,
                 operator: TokenType.BangEq,
-                lhs: register,
+                lhs: {
+                    type: ExpressionType.StackRef,
+                    offset: 1,
+                },
                 rhs: {
                     type: ExpressionType.NullLiteral,
                     value: null,

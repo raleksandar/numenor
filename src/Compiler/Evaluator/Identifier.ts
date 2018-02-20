@@ -1,4 +1,4 @@
-import { InternalEvaluator, EvaluatorContext, RegisterSet, makeConstEval, markAsConst } from './';
+import { InternalEvaluator, EvaluatorContext, makeConstEval, markAsConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, UndefinedIdentifier, CannotAccessProto } from '../Error';
@@ -35,22 +35,5 @@ export function Identifier(expr: Expression.Any, options: CompilerOptions, compi
 
     return (context: EvaluatorContext) => {
         return get(context, name);
-    };
-}
-
-export function Register(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
-
-    if (expr.type !== ExpressionType.Register) {
-        throw new TypeError(UnknownExpression(expr));
-    }
-
-    const {index} = expr;
-
-    return (context: EvaluatorContext, registers: RegisterSet) => {
-        const register = registers[index];
-        if (typeof register !== 'undefined') {
-            return register.value;
-        }
-        return undefined;
     };
 }

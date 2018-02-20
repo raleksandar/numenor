@@ -9,21 +9,19 @@ export interface Evaluator {
     [ConstValue]?: boolean;
 }
 
-export interface Register {
-    value: any;
-    [ConstValue]: boolean;
-}
-
-export interface RegisterSet {
-    [index: number]: Register;
+export interface Stack {
+    [index: number]: any;
+    length: number;
+    push(value: any): number;
+    pop(): any;
 }
 
 export interface InternalEvaluator {
-    (context: EvaluatorContext, registers: RegisterSet): any;
+    (context: EvaluatorContext, stack: Stack): any;
     [ConstValue]?: boolean;
 }
 
-export function hasConstValue(object: Evaluator | Register): boolean {
+export function hasConstValue(object: Evaluator): boolean {
     return object[ConstValue] === true;
 }
 
@@ -37,8 +35,7 @@ export function makeConstEval(value: any): Evaluator {
 }
 
 export const EmptyContext: EvaluatorContext = Object.create(null);
-export const RootRegisters: RegisterSet = [];
 
 export function evalConst(evaluator: InternalEvaluator) {
-    return evaluator(EmptyContext, RootRegisters);
+    return evaluator(EmptyContext, []);
 }

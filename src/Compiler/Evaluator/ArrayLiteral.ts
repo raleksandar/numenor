@@ -5,7 +5,7 @@ import {
     makeConstEval,
     evalConst,
     EvaluatorContext,
-    RegisterSet
+    Stack
 } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
@@ -36,12 +36,12 @@ export function ArrayLiteral(expr: Expression.Any, options: CompilerOptions, com
 
     const length = items.length;
 
-    return (context: EvaluatorContext, registers: RegisterSet) => {
+    return (context: EvaluatorContext, stack: Stack) => {
 
         const array: any[] = new Array(length);
 
         for (let i = 0; i < length; i++) {
-            array[i] = items[i](context, registers);
+            array[i] = items[i](context, stack);
         }
 
         return array;

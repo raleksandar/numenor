@@ -1,4 +1,4 @@
-import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator, evalConst } from './';
+import { InternalEvaluator, Stack, EvaluatorContext, hasConstValue, Evaluator, evalConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
@@ -17,9 +17,9 @@ export function Conditional(expr: Expression.Any, options: CompilerOptions, comp
         return evalConst(lhs) ? thenBranch : elseBranch;
     }
 
-    return (context: EvaluatorContext, registers: RegisterSet) => {
-        return lhs(context, registers) ?
-            thenBranch(context, registers) :
-            elseBranch(context, registers);
+    return (context: EvaluatorContext, stack: Stack) => {
+        return lhs(context, stack) ?
+            thenBranch(context, stack) :
+            elseBranch(context, stack);
     };
 }

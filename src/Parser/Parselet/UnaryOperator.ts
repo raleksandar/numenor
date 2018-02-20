@@ -55,7 +55,6 @@ export function makePrefixAccessMutatorParselet(): Prefix {
         const lhs = parser.parse(PrefixPrecedence);
 
         if (lhs.type !== ExpressionType.Identifier &&
-            lhs.type !== ExpressionType.Register &&
             lhs.type !== ExpressionType.MemberAccess &&
             lhs.type !== ExpressionType.ComputedMemberAccess
         ) {
@@ -91,43 +90,38 @@ export function makePostfixAccessMutatorParselet<T extends TokenType.BinaryOpera
             throw new SyntaxError(UnknownToken(token));
         }
 
-        // a++ => (#0 = a, a = a + 1, #0)
+        // a++ => (#push(a), a = #ref(1) + 1, #pop())
 
         if (lhs.type !== ExpressionType.Identifier &&
-            lhs.type !== ExpressionType.Register &&
             lhs.type !== ExpressionType.MemberAccess &&
             lhs.type !== ExpressionType.ComputedMemberAccess
         ) {
             throw new SyntaxError(InvalidLeftHandSide);
         }
 
-        const register: Expr = {
-            type: ExpressionType.Register,
-            index: 0
-        };
-
         return {
             type: ExpressionType.Sequence,
-            expressions: [
-                {
-                    type: ExpressionType.Assignment,
-                    lhs: register,
-                    rhs: lhs,
-                }, {
-                    type: ExpressionType.Assignment,
-                    lhs,
-                    rhs: {
-                        type: ExpressionType.BinaryOperation,
-                        lhs,
-                        rhs: {
-                            type: ExpressionType.NumberLiteral,
-                            value: 1,
-                        },
-                        operator: token.operator,
+            expressions: [{
+                type: ExpressionType.StackPush,
+                rhs: lhs,
+            }, {
+                type: ExpressionType.Assignment,
+                lhs,
+                rhs: {
+                    type: ExpressionType.BinaryOperation,
+                    lhs: {
+                        type: ExpressionType.StackRef,
+                        offset: 1,
                     },
+                    rhs: {
+                        type: ExpressionType.NumberLiteral,
+                        value: 1,
+                    },
+                    operator: token.operator,
                 },
-                register,
-            ],
+            }, {
+                type: ExpressionType.StackPop,
+            }],
         };
     }
 

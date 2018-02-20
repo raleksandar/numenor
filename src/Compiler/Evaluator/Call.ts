@@ -1,4 +1,4 @@
-import { InternalEvaluator, RegisterSet, EvaluatorContext, hasConstValue, Evaluator, markAsConst } from './';
+import { InternalEvaluator, Stack, EvaluatorContext, hasConstValue, Evaluator, markAsConst } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, CantInvoke } from '../Error';
@@ -26,9 +26,9 @@ export function Call(expr: Expression.Any, options: CompilerOptions, compile: Ev
 
     const {length} = args;
 
-    const evaluator = (context: EvaluatorContext, registers: RegisterSet) => {
+    const evaluator = (context: EvaluatorContext, stack: Stack) => {
 
-        const callee = lhs(context, registers);
+        const callee = lhs(context, stack);
 
         if (typeof callee !== 'function') {
             throw new TypeError(CantInvoke);
@@ -37,7 +37,7 @@ export function Call(expr: Expression.Any, options: CompilerOptions, compile: Ev
         const params: any[] = new Array(length);
 
         for (let i = 0; i < length; i++) {
-            params[i] = args[i](context, registers);
+            params[i] = args[i](context, stack);
         }
 
         return callee(...params);
