@@ -1,14 +1,19 @@
 import { Expression, ExpressionType } from '../Parser';
 import { Evaluator, InternalEvaluator, EvaluatorContext, EmptyContext } from './Evaluator';
 import * as Error from './Error';
+import { ArrayPrototype } from './ArrayPrototype';
+import { makeValueMarshaller } from './Evaluator/util';
 
 export interface CompilerOptions {
-    NoUndefinedVars?: boolean;  // throws if referencing variable not defined in the context
-    NoNewVars?: boolean;        // throws if assigning a value to the variable not defined in context
-    ImmutableContext?: boolean; // throws if trying to use any assignment operation
-    NoProtoAccess?: boolean;    // disallows accessing or traversing of prototype chain
-    Constants?: {               // compile-time constants to use
-        [name: string]: any;    // if a constant has function type it is eligible for CTFE
+    NoUndefinedVars?: boolean;      // throws if referencing variable not defined in the context
+    NoNewVars?: boolean;            // throws if assigning a value to the variable not defined in context
+    ImmutableContext?: boolean;     // throws if trying to use any assignment operation
+    NoProtoAccess?: boolean;        // disallows accessing or traversing of prototype chain
+    ObjectPrototype?: any;          // prototype to use for objects created via object literals
+    ArrayPrototype?: any;           // prototype to use for array values
+    EnforceMarshalling?: boolean;   // enforce given prototypes on object returned from evaluator
+    Constants?: {                   // compile-time constants to use
+        [name: string]: any;        // if a constant has function type it is eligible for CTFE
     };
 }
 
@@ -21,6 +26,9 @@ const DefaultOptions: CompilerOptions = {
     NoNewVars: false,
     ImmutableContext: false,
     NoProtoAccess: true,
+    ObjectPrototype: null,
+    ArrayPrototype,
+    EnforceMarshalling: false,
     Constants: Object.create(null),
 };
 
@@ -47,9 +55,10 @@ export abstract class Compiler {
 
         const compileOptions = {...DefaultOptions, ...options};
         const evaluator = compile(expression, compileOptions, compile);
+        const marshallValue = makeValueMarshaller(compileOptions);
 
         return (context?: EvaluatorContext) => {
-            return evaluator(context || EmptyContext, []);
+            return marshallValue(evaluator(context || EmptyContext, []));
         };
     }
 }

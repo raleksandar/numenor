@@ -2,7 +2,7 @@ import { InternalEvaluator, EvaluatorContext, makeConstEval, markAsConst } from 
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, UndefinedIdentifier, CannotAccessProto } from '../Error';
-import { hasProtoProp, hasOwnProp, ownPropGetter, protoPropGetter, bindFunction } from './util';
+import { hasOwnProp, ownPropGetter, bindFunction, makeProtoPropQuery, makeProtoPropGetter } from './util';
 
 export function Identifier(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
 
@@ -16,7 +16,7 @@ export function Identifier(expr: Expression.Any, options: CompilerOptions, compi
         return markAsConst(() => { throw new TypeError(CannotAccessProto); });
     }
 
-    const contains = options.NoProtoAccess ? hasOwnProp : hasProtoProp;
+    const contains = options.NoProtoAccess ? hasOwnProp : makeProtoPropQuery(options);
 
     if (options.Constants && contains(options.Constants, name)) {
         const value = options.Constants[name];
@@ -26,7 +26,7 @@ export function Identifier(expr: Expression.Any, options: CompilerOptions, compi
         return makeConstEval(value);
     }
 
-    const get = options.NoProtoAccess ? ownPropGetter : protoPropGetter;
+    const get = options.NoProtoAccess ? ownPropGetter : makeProtoPropGetter(options);
 
     const evaluator = (context: EvaluatorContext) => {
 

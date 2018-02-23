@@ -2,6 +2,7 @@ import { InternalEvaluator, Stack, EvaluatorContext, hasConstValue, Evaluator, m
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, CantInvoke } from '../Error';
+import { makeValueMarshaller } from './util';
 
 export function Call(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
 
@@ -25,6 +26,7 @@ export function Call(expr: Expression.Any, options: CompilerOptions, compile: Ev
     });
 
     const {length} = args;
+    const marshallValue = makeValueMarshaller(options);
 
     const evaluator = (context: EvaluatorContext, stack: Stack) => {
 
@@ -37,7 +39,7 @@ export function Call(expr: Expression.Any, options: CompilerOptions, compile: Ev
         const params: any[] = new Array(length);
 
         for (let i = 0; i < length; i++) {
-            params[i] = args[i](context, stack);
+            params[i] = marshallValue(args[i](context, stack));
         }
 
         return callee(...params);

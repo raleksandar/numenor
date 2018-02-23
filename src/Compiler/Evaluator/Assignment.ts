@@ -7,7 +7,7 @@ import {
     ImmutableContext,
     CannotAccessProperty
 } from '../Error';
-import { hasOwnProp, hasProtoProp } from './util';
+import { hasOwnProp, makeProtoPropQuery } from './util';
 
 export function Assignment(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
 
@@ -21,7 +21,7 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
 
     const rhs = compile(expr.rhs, options, compile);
 
-    const contains = options.NoProtoAccess ? hasOwnProp : hasProtoProp;
+    const contains = options.NoProtoAccess ? hasOwnProp : makeProtoPropQuery(options);
     const isConst = options.Constants && hasConstValue(rhs as Evaluator);
 
     if (expr.lhs.type === ExpressionType.Identifier) {

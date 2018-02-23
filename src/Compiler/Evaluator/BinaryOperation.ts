@@ -3,7 +3,7 @@ import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
 import { TokenType } from '../../Lexer';
-import { hasOwnProp, hasProtoProp } from './util';
+import { hasOwnProp, makeProtoPropQuery } from './util';
 
 export function BinaryOperation(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
 
@@ -70,7 +70,9 @@ export function BinaryOperation(expr: Expression.Any, options: CompilerOptions, 
 
     // unlike in JS `in` operator works on arrays: 2 in [1, 2, 3] === true
     if (expr.operator === TokenType.In) {
-        const contains = options.NoProtoAccess ? hasOwnProp : hasProtoProp;
+
+        const contains = options.NoProtoAccess ? hasOwnProp : makeProtoPropQuery(options);
+
         return maybeConst(lhs, rhs, (context, stack) => {
 
             const item = lhs(context, stack);

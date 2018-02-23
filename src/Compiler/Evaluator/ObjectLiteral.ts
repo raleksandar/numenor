@@ -36,9 +36,11 @@ export function ObjectLiteral(expr: Expression.Any, options: CompilerOptions, co
         };
     });
 
+    const {ObjectPrototype} = options;
+
     if (isConst) {
 
-        const object = Object.create(null);
+        const object = Object.create(ObjectPrototype);
 
         items.forEach(({name, value}) => {
             object[name] = evalConst(value);
@@ -51,7 +53,7 @@ export function ObjectLiteral(expr: Expression.Any, options: CompilerOptions, co
 
     return (context: EvaluatorContext, stack: Stack) => {
 
-        const object = Object.create(null);
+        const object = Object.create(ObjectPrototype);
 
         for (let i = 0; i < length; i++) {
 

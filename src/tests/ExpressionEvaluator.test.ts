@@ -248,4 +248,50 @@ describe('ExpressionEvaluator', () => {
         expect($eval('o.fn(2, 4, 6, 8)', ctx)).toBe(40);
         expect($compile('[1,2,3,4,5,6].map(fn).indexOf(246)', {NoProtoAccess:false})(ctx)).toBe(1);
     });
+
+    it('Supports custom prototypes for arrays and objects', () => {
+
+        expect(Object.getPrototypeOf($eval('{foo: "bar"}'))).toBe(null);
+
+        expect(() => {
+            // push is not defined on default ArrayPrototype so this throws
+            $compile('[1,2,3].push(4)', {NoProtoAccess: false})();
+        }).toThrowError('Cannot invoke non-function values');
+
+        const ArrayPrototype = {
+            square() {
+                return Array.prototype.map.call(this, (x: number) => x ** 2);
+            }
+        };
+
+        expect($compile('[1,2,3].square()', {ArrayPrototype, NoProtoAccess: false})()).toEqual([1,4,9]);
+    });
+
+    it('Supports value marshalling', () => {
+
+        const ObjectPrototype = {
+            keys() {
+                return Object.keys(this);
+            }
+        };
+
+        const obj = $compile('{a: 1, b: 2, c: 3}', {ObjectPrototype, EnforceMarshalling: true})();
+
+        expect(obj).toEqual({a: 1, b: 2, c: 3});
+        expect(Object.getPrototypeOf(obj)).toBe(ObjectPrototype);
+        expect(obj.keys()).toEqual(['a', 'b', 'c']);
+
+        const ctx = {
+            keys: null,
+            fn(o: any) {
+                this.keys = o.keys();
+                return (this.keys as any).join('|');
+            },
+        };
+
+        const expr = $compile('fn({foo: 1, bar: 2})', {ObjectPrototype, EnforceMarshalling: true});
+
+        expect(expr(ctx)).toBe('foo|bar');
+        expect(ctx.keys).toEqual(['foo', 'bar']);
+    });
 });

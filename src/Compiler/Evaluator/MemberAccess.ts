@@ -2,7 +2,7 @@ import { InternalEvaluator, EvaluatorContext, Stack, hasConstValue, Evaluator, m
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression, CannotAccessProperty, CannotAccessProto } from '../Error';
-import { ownPropGetter, protoPropGetter, bindFunction } from './util';
+import { ownPropGetter, bindFunction, makeProtoPropGetter } from './util';
 
 export function MemberAccess(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
 
@@ -17,13 +17,13 @@ export function MemberAccess(expr: Expression.Any, options: CompilerOptions, com
         return markAsConst(() => { throw new TypeError(CannotAccessProto); });
     }
 
-    const get = options.NoProtoAccess ? ownPropGetter : protoPropGetter;
+    const get = options.NoProtoAccess ? ownPropGetter : makeProtoPropGetter(options);
 
     const evaluator = (context: EvaluatorContext, stack: Stack) => {
 
         const object = lhs(context, stack);
 
-        if (object === null || typeof object !== 'object') {
+        if (object == null) {
             throw new TypeError(CannotAccessProperty(object, name));
         }
 
@@ -52,13 +52,13 @@ export function ComputedMemberAccess(expr: Expression.Any, options: CompilerOpti
     const lhs = compile(expr.lhs, options, compile);
     const rhs = compile(expr.rhs, options, compile);
 
-    const get = options.NoProtoAccess ? ownPropGetter : protoPropGetter;
+    const get = options.NoProtoAccess ? ownPropGetter : makeProtoPropGetter(options);
 
     const evaluator = (context: EvaluatorContext, stack: Stack) => {
 
         const object = lhs(context, stack);
 
-        if (object === null || typeof object !== 'object') {
+        if (object == null) {
             throw new TypeError(CannotAccessProperty(object));
         }
 
