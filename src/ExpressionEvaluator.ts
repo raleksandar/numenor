@@ -2,6 +2,7 @@ import { Parser } from './Parser';
 import { Compiler, CompilerOptions } from './Compiler';
 import { ExpressionParser } from './ExpressionParser';
 import { ExpressionCompiler } from './ExpressionCompiler';
+import { ExpressionLexer } from './ExpressionLexer';
 import { EvaluatorContext, Evaluator } from './Compiler/Evaluator';
 
 export class ExpressionEvaluator {
@@ -10,7 +11,7 @@ export class ExpressionEvaluator {
     private readonly compiler: Compiler;
 
     constructor() {
-        this.parser = new ExpressionParser();
+        this.parser = new ExpressionParser(new ExpressionLexer());
         this.compiler = new ExpressionCompiler();
     }
 

@@ -1,11 +1,11 @@
 import * as ExpressionType from '../ExpressionType';
-import { Parser, makeInfix, Infix } from './';
-import { Token, TokenType } from '../../Lexer';
+import { makeInfix, Infix, InfixFn } from './';
+import { TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 import { Any as Expr } from '../Expression';
 import { Primary as CallPrecedence, Sequence as SequencePrecedence } from '../Precedence';
 
-function parselet(parser: Parser, lhs: Expr, token: Token.Any): Expr {
+const parselet: InfixFn = (parser, lhs, token) => {
 
     if (token.type !== TokenType.LParen) {
         throw new SyntaxError(UnknownToken(token));

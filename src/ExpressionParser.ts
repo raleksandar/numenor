@@ -1,5 +1,5 @@
 import { Parser } from './Parser';
-import { TokenType } from './Lexer';
+import { TokenType, Lexer } from './Lexer';
 import { Identifier, NumberLiteral, StringLiteral, BooleanLiteral, NullLiteral, UndefinedLiteral } from './Parser/Parselet/Value';
 import { makeAssignmentParselet } from './Parser/Parselet/Assignment';
 import { makeBinaryOperatorParselet, RightAssociative } from './Parser/Parselet/BinaryOperator';
@@ -15,10 +15,11 @@ import { ObjectLiteral } from './Parser/Parselet/ObjectLiteral';
 
 export class ExpressionParser extends Parser {
 
-    constructor() {
-        super();
+    constructor(lexer: Lexer) {
+        super(lexer);
 
         this.ignore(TokenType.Whitespace);
+        this.ignore(TokenType.LineTerminator);
 
         this.setInfix(TokenType.Comma, Sequence);
 

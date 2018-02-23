@@ -42,6 +42,10 @@ export interface Whitespace extends Position {
     readonly type: typeof TokenType.Whitespace;
 }
 
+export interface LineTerminator extends Position {
+    readonly type: typeof TokenType.LineTerminator;
+}
+
 export interface NumberLiteral extends Literal {
     readonly type: typeof TokenType.NumberLiteral;
     readonly value: number;
@@ -290,6 +294,7 @@ export type Any = Unknown
     | Invalid
     | EOF
     | Whitespace
+    | LineTerminator
     | NumberLiteral
     | StringLiteral
     | BooleanLiteral

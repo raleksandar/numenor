@@ -1,7 +1,7 @@
-import { Infix, Parser, makeInfix } from './';
+import { Infix, makeInfix, InfixFn } from './';
 import { Any as Expr } from '../Expression';
 import { BinaryOperation } from '../ExpressionType';
-import { Token, TokenType } from '../../Lexer';
+import { TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 import { Any as Precedence } from '../Precedence';
 
@@ -16,7 +16,7 @@ export function makeBinaryOperatorParselet<T extends TokenType.BinaryOperator>(
     associativity: Associativity = LeftAssociative,
 ): Infix {
 
-    const parselet = (parser: Parser, lhs: Expr, token: Token.Any): Expr => {
+    const parselet: InfixFn = (parser, lhs, token): Expr => {
 
         if (token.type !== operator) {
             throw new SyntaxError(UnknownToken(token));

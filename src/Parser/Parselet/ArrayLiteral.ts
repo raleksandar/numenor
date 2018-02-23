@@ -1,11 +1,11 @@
 import * as ExpressionType from '../ExpressionType';
-import { Prefix, Parser } from './';
-import { Token, TokenType } from '../../Lexer';
+import { Prefix } from './';
+import { TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 import { Any as Expression } from '../Expression';
 import { Sequence as SequencePrecedence } from '../Precedence';
 
-export const ArrayLiteral: Prefix = (parser: Parser, token: Token.Any) => {
+export const ArrayLiteral: Prefix = (parser, token) => {
 
     if (token.type !== TokenType.LBracket) {
         throw new SyntaxError(UnknownToken(token));

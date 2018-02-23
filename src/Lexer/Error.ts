@@ -12,6 +12,7 @@ export const ExpectedBinaryDigit = `${numeric} expected binary digit`;
 
 const string = `Invalid string literal:`;
 export const UnterminatedString = `${string} missing closing quote`;
+export const InvalidEscapeSequence = `${string} invalid escape sequence`;
 export const HexadecimalEscape = `${string} expected 2-digit hexadecimal character code`;
 export const UnicodeEscape = `${string} expected 4-digit hexadecimal character code`;
 export const UnicodeCodePointEscape = `${string} expected hexadecimal Unicode code point`;

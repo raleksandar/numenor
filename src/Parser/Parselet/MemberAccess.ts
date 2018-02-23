@@ -1,11 +1,10 @@
 import * as ExpressionType from '../ExpressionType';
-import { Parser, makeInfix, Infix } from './';
-import { Token, TokenType } from '../../Lexer';
+import { makeInfix, Infix, InfixFn } from './';
+import { TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
-import { Any as Expr } from '../Expression';
 import { Primary as MemberAccessPrecedence } from '../Precedence';
 
-function dot(parser: Parser, lhs: Expr, token: Token.Any): Expr {
+const dot: InfixFn = (parser, lhs, token) => {
 
     if (token.type !== TokenType.Dot) {
         throw new SyntaxError(UnknownToken(token));
@@ -37,7 +36,7 @@ function dot(parser: Parser, lhs: Expr, token: Token.Any): Expr {
 
 export const MemberAccess: Infix = makeInfix(dot, MemberAccessPrecedence);
 
-function index(parser: Parser, lhs: Expr, token: Token.Any): Expr {
+const index: InfixFn = (parser, lhs, token) => {
 
     if (token.type !== TokenType.LBracket) {
         throw new SyntaxError(UnknownToken(token));

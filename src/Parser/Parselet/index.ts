@@ -7,10 +7,10 @@ export interface Parser {
     /**
      * Current token.
      *
-     * @type {Token.Any}
+     * @type {Token}
      * @memberof Parser
      */
-    token: Token.Any;
+    token: Token;
 
     /**
      * Parse next expression in input
@@ -45,17 +45,17 @@ export interface Parser {
     /**
      * Returns current token and then advances to the next token.
      *
-     * @returns {Token.Any}
+     * @returns {Token}
      * @memberof Parser
      */
-    shift(): Token.Any;
+    shift(): Token;
 
     /**
      * Inserts a token at the current position (before the current token).
      *
      * @param token Token to insert
      */
-    unshift(token: Token.Any): void;
+    unshift(token: Token): void;
 
     /**
      * Verifies that the current token matches given type, returns it and then
@@ -64,17 +64,17 @@ export interface Parser {
      * token SyntaxError is thrown.
      *
      * @param {TokenType.Any} tokenType Token type to match
-     * @returns {Token.Any}
+     * @returns {Token}
      * @memberof Parser
      */
-    expect(tokenType: TokenType.Any): Token.Any;
+    expect(tokenType: TokenType.Any): Token;
 }
 
 export interface Prefix {
-    (parser: Parser, token: Token.Any): Expr;
+    (parser: Parser, token: Token): Expr;
 }
 
-export type InfixFn = (parser: Parser, lhs: Expr, token: Token.Any) => Expr;
+export type InfixFn = (parser: Parser, lhs: Expr, token: Token) => Expr;
 
 export interface Infix extends InfixFn {
     readonly precedence: Precedence;

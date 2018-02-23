@@ -8,6 +8,7 @@ export const NullLiteral = Symbol('null');
 export const UndefinedLiteral = Symbol('undefined');
 export const Identifier = Symbol('Identifier');
 export const Whitespace = Symbol('Whitespace');
+export const LineTerminator = Symbol('LineTerminator');
 export const LParen = Symbol('(');
 export const RParen = Symbol(')');
 export const LBrace = Symbol('{');
@@ -141,6 +142,7 @@ export type Any = typeof Unknown
     | typeof Invalid
     | typeof EOF
     | typeof Whitespace
+    | typeof LineTerminator
     | typeof LParen
     | typeof RParen
     | typeof LBrace

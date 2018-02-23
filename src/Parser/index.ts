@@ -1,4 +1,4 @@
-import { Lexer, TokenType, Token } from '../Lexer';
+import { Lexer, TokenType, Token, LexerState, InitialLexerState } from '../Lexer';
 import * as Expression from './Expression';
 import * as Parselet from './Parselet';
 import * as Precedence from './Precedence';
@@ -19,7 +19,7 @@ type TokenSet = Set<TokenType.Any>;
 
 class ParserContext implements Parselet.Parser {
 
-    private queue: Token.Any[] = [];
+    private queue: Token[] = [];
 
     constructor(
         private readonly lexer: Lexer,
@@ -31,12 +31,12 @@ class ParserContext implements Parselet.Parser {
     }
 
     private skipIgnored() {
-        while (this.ignored.has(this.lexer.token.type as TokenType.Any)) {
+        while (this.ignored.has(this.lexer.token.type)) {
             this.lexer.next();
         }
     }
 
-    get token(): Token.Any {
+    get token(): Token {
         if (this.queue.length > 0) {
             return this.queue.shift()!;
         }
@@ -81,8 +81,8 @@ class ParserContext implements Parselet.Parser {
         return true;
     }
 
-    shift(): Token.Any {
-        let token: Token.Any;
+    shift(): Token {
+        let token: Token;
         do {
             if (this.queue.length > 0) {
                 token = this.queue.shift()!;
@@ -93,11 +93,11 @@ class ParserContext implements Parselet.Parser {
         return token;
     }
 
-    unshift(token: Token.Any) {
+    unshift(token: Token) {
         this.queue.unshift(token);
     }
 
-    expect(tokenType: TokenType.Any): Token.Any {
+    expect(tokenType: TokenType.Any): Token {
         if (this.token.type !== tokenType) {
             throw new SyntaxError(Error.UnexpectedToken(tokenType, this.token));
         }
@@ -105,18 +105,22 @@ class ParserContext implements Parselet.Parser {
     }
 }
 
-export type ParserInput = Lexer | string;
-
 export abstract class Parser {
 
     private readonly prefix: PrefixParsers;
     private readonly infix: InfixParsers;
     private readonly ignored: TokenSet;
+    private lexerState: LexerState;
 
-    constructor() {
+    constructor(private readonly lexer: Lexer) {
         this.prefix = new Map();
         this.infix = new Map();
         this.ignored = new Set();
+        this.lexerState = {
+            offset: 0,
+            line: 1,
+            col: 0,
+        };
     }
 
     protected setPrefix(tokenType: TokenType.Any, parser: Parselet.Prefix) {
@@ -131,10 +135,20 @@ export abstract class Parser {
         this.ignored.add(tokenType);
     }
 
-    parse(input: ParserInput): Expression.Any {
+    get state(): LexerState {
+        return this.lexerState;
+    }
+
+    parse(input: string, state?: LexerState, exhaustive = true): Expression.Any {
+
+        if (!state) {
+            state = InitialLexerState;
+        }
+
+        this.lexer.initialize(input, state);
 
         const parserContext = new ParserContext(
-            input instanceof Lexer ? input : new Lexer(input),
+            this.lexer,
             this.prefix,
             this.infix,
             this.ignored
@@ -142,7 +156,9 @@ export abstract class Parser {
 
         const expression = parserContext.parse();
 
-        if (!parserContext.match(TokenType.EOF)) {
+        this.lexerState = this.lexer.currentState;
+
+        if (exhaustive && !parserContext.match(TokenType.EOF)) {
             throw new SyntaxError(Error.UnknownToken(parserContext.token));
         }
 

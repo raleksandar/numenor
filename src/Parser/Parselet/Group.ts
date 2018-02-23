@@ -1,8 +1,8 @@
-import { Prefix, Parser } from './';
-import { Token, TokenType } from '../../Lexer';
+import { Prefix } from './';
+import { TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 
-export const Group: Prefix = (parser: Parser, token: Token.Any) => {
+export const Group: Prefix = (parser, token) => {
 
     if (token.type !== TokenType.LParen) {
         throw new SyntaxError(UnknownToken(token));

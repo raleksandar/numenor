@@ -1,5 +1,5 @@
 import * as ExpressionType from '../ExpressionType';
-import { Parser, makeInfix, Infix } from './';
+import { makeInfix, Infix, InfixFn } from './';
 import { Token, TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 import { Any as Expr } from '../Expression';
@@ -7,7 +7,7 @@ import { Conditional as ConditionalPrecedence, Primary as PrimaryPrecedence } fr
 import { ComputedMemberAccess, MemberAccess } from './MemberAccess';
 import { Call } from './Call';
 
-function conditional(parser: Parser, lhs: Expr, token: Token.Any): Expr {
+const conditional: InfixFn = (parser, lhs, token) => {
 
     if (token.type !== TokenType.Question) {
         throw new SyntaxError(UnknownToken(token));
@@ -29,7 +29,7 @@ function conditional(parser: Parser, lhs: Expr, token: Token.Any): Expr {
 
 export const Conditional: Infix = makeInfix(conditional, ConditionalPrecedence);
 
-function coalesce(parser: Parser, lhs: Expr, token: Token.Any): Expr {
+const coalesce: InfixFn = (parser, lhs, token) => {
 
     if (token.type !== TokenType.QuestionQuestion) {
         throw new SyntaxError(UnknownToken(token));
@@ -73,7 +73,7 @@ function coalesce(parser: Parser, lhs: Expr, token: Token.Any): Expr {
 
 export const NullCoalesce: Infix = makeInfix(coalesce, ConditionalPrecedence);
 
-function access(parser: Parser, lhs: Expr, token: Token.Any): Expr {
+const access: InfixFn = (parser, lhs, token) => {
 
     if (token.type !== TokenType.QuestionDot) {
         throw new SyntaxError(UnknownToken(token));
@@ -94,7 +94,7 @@ function access(parser: Parser, lhs: Expr, token: Token.Any): Expr {
     } else if (parser.match(TokenType.LParen)) {
         thenBranch = Call(parser, pop, parser.shift());
     } else {
-        const dot: Token.Dot = {
+        const dot: Token = {
             type: TokenType.Dot,
             line: token.line,
             col: token.col,

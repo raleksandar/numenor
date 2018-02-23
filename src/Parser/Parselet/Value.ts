@@ -1,10 +1,10 @@
 import * as ExpressionType from '../ExpressionType';
-import { Prefix, Parser } from './';
-import { Token, TokenType } from '../../Lexer';
+import { Prefix } from './';
+import { TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 import { Any as Expression } from '../Expression';
 
-export const Identifier: Prefix = (parser: Parser, token: Token.Any) => {
+export const Identifier: Prefix = (parser, token) => {
     if (token.type !== TokenType.Identifier) {
         throw new SyntaxError(UnknownToken(token));
     }
@@ -19,7 +19,7 @@ function parse<T extends TokenType.Literal, E extends ExpressionType.Value>(
     expression: E,
 ): Prefix {
 
-    return (parser: Parser, token: Token.Any) => {
+    return (parser, token) => {
 
         if (token.type !== literal) {
             throw new SyntaxError(UnknownToken(token));

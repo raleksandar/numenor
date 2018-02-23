@@ -1,18 +1,18 @@
 import * as ExpressionType from '../ExpressionType';
-import { Parser, makeInfix, Infix } from './';
+import { makeInfix, Infix, InfixFn } from './';
 import { Token, TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 import { Any as Expr } from '../Expression';
 import { Sequence as SequencePrecedence } from '../Precedence';
 
-function parselet(parser: Parser, lhs: Expr, token: Token.Any): Expr {
+const parselet: InfixFn = (parser, lhs, token) => {
 
     if (token.type !== TokenType.Comma) {
         throw new SyntaxError(UnknownToken(token));
     }
 
     const expressions: Expr[] = [lhs];
-    let comma: Token.Any = token;
+    let comma: Token = token;
 
     do {
         if (parser.match(TokenType.EOF) || parser.match(TokenType.RParen)) {

@@ -1,4 +1,5 @@
 import { ExpressionParser } from '../ExpressionParser';
+import { ExpressionLexer } from '../ExpressionLexer';
 import * as ExpressionType from '../Parser/ExpressionType';
 import * as Expression from '../Parser/Expression';
 
@@ -7,7 +8,7 @@ describe('ExpressionParser', () => {
     let parser: ExpressionParser;
 
     beforeAll(() => {
-        parser = new ExpressionParser();
+        parser = new ExpressionParser(new ExpressionLexer());
     });
 
     it('Parses identifier expression', () => {

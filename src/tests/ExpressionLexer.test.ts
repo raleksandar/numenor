@@ -1,10 +1,12 @@
-import { Lexer, Token, TokenType, LexerError } from '../';
+import { Token, TokenType, LexerError } from '../Lexer';
+import { ExpressionLexer } from '../ExpressionLexer';
 
 describe('Lexer', () => {
 
+    const lexer = new ExpressionLexer();
     const tokenize = (input: string) => {
-        const lexer = new Lexer(input);
-        const tokens: Token.Any[] = [lexer.token];
+        lexer.initialize(input);
+        const tokens: Token[] = [lexer.token];
         while (lexer.token.type !== TokenType.EOF) {
             tokens.push(lexer.next());
         }

@@ -1,13 +1,13 @@
-import { Prefix, Infix, makeInfix, Parser } from './';
+import { Prefix, Infix, makeInfix, InfixFn } from './';
 import { Any as Expr } from '../Expression';
-import { Token, TokenType } from '../../Lexer';
+import { TokenType } from '../../Lexer';
 import { UnknownToken, InvalidLeftHandSide } from '../Error';
 import { Any as Precedence, Postfix as PostfixPrecedence, Prefix as PrefixPrecedence } from '../Precedence';
 import * as ExpressionType from '../ExpressionType';
 
 export function makePrefixOperatorParselet<T extends TokenType.UnaryOperator>(operator: T): Prefix {
 
-    return (parser: Parser, token: Token.Any): Expr => {
+    return (parser, token) => {
 
         if (token.type !== operator) {
             throw new SyntaxError(UnknownToken(token));
@@ -26,7 +26,7 @@ export function makePostfixOperatorParselet<T extends TokenType.UnaryOperator>(
     precedence: Precedence = PostfixPrecedence,
 ): Infix {
 
-    const parselet = (parser: Parser, lhs: Expr, token: Token.Any): Expr => {
+    const parselet: InfixFn = (parser, lhs, token) => {
 
         if (token.type !== operator) {
             throw new SyntaxError(UnknownToken(token));
@@ -44,7 +44,7 @@ export function makePostfixOperatorParselet<T extends TokenType.UnaryOperator>(
 
 export function makePrefixAccessMutatorParselet(): Prefix {
 
-    return (parser: Parser, token: Token.Any): Expr => {
+    return (parser, token): Expr => {
 
         if (!('operator' in token)) {
             throw new SyntaxError(UnknownToken(token));
@@ -84,7 +84,7 @@ export function makePostfixAccessMutatorParselet<T extends TokenType.BinaryOpera
     precedence: Precedence = PostfixPrecedence,
 ): Infix {
 
-    const parselet = (parser: Parser, lhs: Expr, token: Token.Any): Expr => {
+    const parselet: InfixFn = (parser, lhs, token) => {
 
         if (!('operator' in token)) {
             throw new SyntaxError(UnknownToken(token));
