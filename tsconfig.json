@@ -15,7 +15,7 @@
         "forceConsistentCasingInFileNames": true,
         "pretty": true,
         "skipLibCheck": true,
-        "sourceMap": true
+        "inlineSourceMap": true
     },
     "include": [
         "src/**/*"
