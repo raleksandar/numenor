@@ -25,7 +25,8 @@ class ParserContext implements Parselet.Parser {
         private readonly lexer: Lexer,
         private readonly prefix: PrefixParsers,
         private readonly infix: InfixParsers,
-        private readonly ignored: TokenSet = new Set()
+        private readonly ignored: TokenSet = new Set(),
+        private readonly context: any
     ) {
         this.skipIgnored();
     }
@@ -42,22 +43,23 @@ class ParserContext implements Parselet.Parser {
 
         let token = this.shift();
 
-        const parser = this.prefix.get(token.type as TokenType.Any);
+        const parser = this.prefix.get(token.type);
+
         if (parser === undefined) {
             throw new SyntaxError(Error.UnknownToken(token));
         }
 
-        let expression = parser(this, token);
+        let expression = parser(this, token, this.context);
 
         while (true) {
 
-            const parser = this.infix.get(this.token.type as TokenType.Any);
+            const parser = this.infix.get(this.token.type);
 
             if (parser === undefined || precedence >= parser.precedence) {
                 break;
             }
 
-            expression = parser(this, expression, this.shift());
+            expression = parser(this, expression, this.shift(), this.context);
         }
 
         return expression;
@@ -107,6 +109,8 @@ class ParserContext implements Parselet.Parser {
 
 export abstract class Parser {
 
+    parseletContext: any;
+
     private readonly prefix: PrefixParsers;
     private readonly infix: InfixParsers;
     private readonly ignored: TokenSet;
@@ -139,7 +143,8 @@ export abstract class Parser {
             this.lexer,
             this.prefix,
             this.infix,
-            this.ignored
+            this.ignored,
+            this.parseletContext,
         );
 
         const expression = parserContext.parse();

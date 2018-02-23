@@ -2,13 +2,13 @@ import * as ExpressionType from '../ExpressionType';
 import { makeInfix, Infix, InfixFn } from './';
 import { Assignment as AssignmentPrecedence } from '../Precedence';
 import { Any as Expr } from '../Expression';
-import { TokenType } from '../../Lexer';
+import { TokenType, Token } from '../../Lexer';
 import { UnknownToken, InvalidLeftHandSide } from '../Error';
 import { NullCoalesce } from './Conditional';
 
 export function makeAssignmentParselet<T extends TokenType.Any>(operator: T): Infix {
 
-    const parselet: InfixFn = (parser, lhs, token): Expr => {
+    const parselet: InfixFn = (parser, lhs, token, context): Expr => {
 
         if (!('operator' in token)) {
             throw new SyntaxError(UnknownToken(token));
@@ -25,11 +25,12 @@ export function makeAssignmentParselet<T extends TokenType.Any>(operator: T): In
 
         if (operator === TokenType.QuestionQuestion) {
             // a ??= b => a = a ?? b => a = (#push(a), #ref(1) != null ? #pop() : (#pop(), b))
-            rhs = NullCoalesce(parser, lhs, {
+            const qq: Token = {
                 type: TokenType.QuestionQuestion,
                 line: token.line,
                 col: token.col,
-            });
+            };
+            rhs = NullCoalesce(parser, lhs, qq, context);
         } else {
             rhs = parser.parse(AssignmentPrecedence - 1);
             if (operator !== TokenType.Eq) {

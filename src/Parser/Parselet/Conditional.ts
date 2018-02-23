@@ -73,7 +73,7 @@ const coalesce: InfixFn = (parser, lhs, token) => {
 
 export const NullCoalesce: Infix = makeInfix(coalesce, ConditionalPrecedence);
 
-const access: InfixFn = (parser, lhs, token) => {
+const access: InfixFn = (parser, lhs, token, context) => {
 
     if (token.type !== TokenType.QuestionDot) {
         throw new SyntaxError(UnknownToken(token));
@@ -90,16 +90,16 @@ const access: InfixFn = (parser, lhs, token) => {
     let thenBranch: Expr;
 
     if (parser.match(TokenType.LBracket)) {
-        thenBranch = ComputedMemberAccess(parser, pop, parser.shift());
+        thenBranch = ComputedMemberAccess(parser, pop, parser.shift(), context);
     } else if (parser.match(TokenType.LParen)) {
-        thenBranch = Call(parser, pop, parser.shift());
+        thenBranch = Call(parser, pop, parser.shift(), context);
     } else {
         const dot: Token = {
             type: TokenType.Dot,
             line: token.line,
             col: token.col,
         };
-        thenBranch = MemberAccess(parser, pop, dot);
+        thenBranch = MemberAccess(parser, pop, dot, context);
     }
 
     return {
