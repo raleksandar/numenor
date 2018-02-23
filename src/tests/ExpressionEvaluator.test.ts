@@ -2,7 +2,6 @@ import { ExpressionEvaluator } from '../';
 import { EvaluatorContext } from '../Compiler/Evaluator';
 import { CompilerOptions } from '../Compiler';
 
-
 describe('ExpressionEvaluator', () => {
 
     const evaluator = new ExpressionEvaluator();
@@ -26,7 +25,7 @@ describe('ExpressionEvaluator', () => {
     });
 
     it('Evaluates object literal expression', () => {
-        expect($eval('{a: 1, "b": 2, ["c" + 3]: 3}')).toEqual({a: 1, b: 2, c3: 3});
+        expect($eval('{a: 1, "b": 2, ["c" + 3]: 3}')).toEqual({ a: 1, b: 2, c3: 3 });
     });
 
     it('Evaluates binary expressions', () => {
@@ -58,7 +57,7 @@ describe('ExpressionEvaluator', () => {
         expect($eval('foo * bar', ctx)).toBe(20);
         expect($eval('bar in [1, 2, 10, 20, 30]', ctx)).toBe(true);
         expect($eval('obj.a * obj.b.c', ctx)).toBe(55);
-        expect($eval('{[prop()]: 123}', ctx)).toEqual({baz: 123});
+        expect($eval('{[prop()]: 123}', ctx)).toEqual({ baz: 123 });
     });
 
     it('Writes variables from context', () => {
@@ -76,7 +75,7 @@ describe('ExpressionEvaluator', () => {
         };
 
         expect(() => {
-            evaluator.evaluate('foo', ctx, {NoUndefinedVars: true});
+            $compile('foo', { NoUndefinedVars: true })(ctx);
         }).toThrowError('foo is not defined');
     });
 
@@ -188,10 +187,10 @@ describe('ExpressionEvaluator', () => {
             $eval('__proto__');
         }).toThrowError('Cannot access __proto__ member');
         expect(() => {
-            $eval('a.__proto__', {a: []});
+            $eval('a.__proto__', { a: [] });
         }).toThrowError('Cannot access __proto__ member');
         expect(() => {
-            $eval('a["__pr" + "oto__"]', {a: []});
+            $eval('a["__pr" + "oto__"]', { a: [] });
         }).toThrowError('Cannot access __proto__ member');
     });
 
@@ -207,21 +206,21 @@ describe('ExpressionEvaluator', () => {
 
         expect(() => {
             // need to turn on NoNewVars or this will set `a` directly on `ctx` otherwise
-            $compile('a = 123', {NoNewVars: true})(ctx);
+            $compile('a = 123', { NoNewVars: true })(ctx);
         }).toThrowError('a is not defined');
     });
 
     it('Traverses prototype chain with {NoProtoAccess: false}', () => {
 
         const ctx = {};
-        const proto = {a: 123};
+        const proto = { a: 123 };
         Object.setPrototypeOf(ctx, proto);
 
-        expect($compile('a', {NoProtoAccess: false})(ctx)).toBe(123);
-        expect($compile('[1,2,3].indexOf', {NoProtoAccess: false})()).toBeInstanceOf(Function);
+        expect($compile('a', { NoProtoAccess: false })(ctx)).toBe(123);
+        expect($compile('[1,2,3].indexOf', { NoProtoAccess: false })()).toBeInstanceOf(Function);
         expect(() => {
             // this still needs to fail as {NoProtoAccess: false} only allows *read* access
-            $compile('a = 123', {NoNewVars: true, NoProtoAccess: false})(ctx);
+            $compile('a = 123', { NoNewVars: true, NoProtoAccess: false })(ctx);
         }).toThrowError('a is not defined');
     });
 
@@ -246,7 +245,7 @@ describe('ExpressionEvaluator', () => {
 
         expect($eval('fn(2)', ctx)).toBe(246);
         expect($eval('o.fn(2, 4, 6, 8)', ctx)).toBe(40);
-        expect($compile('[1,2,3,4,5,6].map(fn).indexOf(246)', {NoProtoAccess:false})(ctx)).toBe(1);
+        expect($compile('[1,2,3,4,5,6].map(fn).indexOf(246)', { NoProtoAccess: false })(ctx)).toBe(1);
     });
 
     it('Supports custom prototypes for arrays and objects', () => {
@@ -255,7 +254,7 @@ describe('ExpressionEvaluator', () => {
 
         expect(() => {
             // push is not defined on default ArrayPrototype so this throws
-            $compile('[1,2,3].push(4)', {NoProtoAccess: false})();
+            $compile('[1,2,3].push(4)', { NoProtoAccess: false })();
         }).toThrowError('Cannot invoke non-function values');
 
         const ArrayPrototype = {
@@ -264,7 +263,7 @@ describe('ExpressionEvaluator', () => {
             }
         };
 
-        expect($compile('[1,2,3].square()', {ArrayPrototype, NoProtoAccess: false})()).toEqual([1,4,9]);
+        expect($compile('[1,2,3].square()', { ArrayPrototype, NoProtoAccess: false })()).toEqual([1,4,9]);
     });
 
     it('Supports value marshalling', () => {
@@ -275,9 +274,9 @@ describe('ExpressionEvaluator', () => {
             }
         };
 
-        const obj = $compile('{a: 1, b: 2, c: 3}', {ObjectPrototype, EnforceMarshalling: true})();
+        const obj = $compile('{a: 1, b: 2, c: 3}', { ObjectPrototype, EnforceMarshalling: true })();
 
-        expect(obj).toEqual({a: 1, b: 2, c: 3});
+        expect(obj).toEqual({ a: 1, b: 2, c: 3 });
         expect(Object.getPrototypeOf(obj)).toBe(ObjectPrototype);
         expect(obj.keys()).toEqual(['a', 'b', 'c']);
 
@@ -289,7 +288,7 @@ describe('ExpressionEvaluator', () => {
             },
         };
 
-        const expr = $compile('fn({foo: 1, bar: 2})', {ObjectPrototype, EnforceMarshalling: true});
+        const expr = $compile('fn({foo: 1, bar: 2})', { ObjectPrototype, EnforceMarshalling: true });
 
         expect(expr(ctx)).toBe('foo|bar');
         expect(ctx.keys).toEqual(['foo', 'bar']);

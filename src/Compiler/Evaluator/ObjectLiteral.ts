@@ -19,7 +19,7 @@ export function ObjectLiteral(expr: Expression.Any, options: CompilerOptions, co
 
     let isConst = true;
 
-    const items = expr.items.map(({name, value}) => {
+    const items = expr.items.map(({ name, value }) => {
 
         const nameEval = compile(name, options, compile);
         const valueEval = compile(value, options, compile);
@@ -36,13 +36,13 @@ export function ObjectLiteral(expr: Expression.Any, options: CompilerOptions, co
         };
     });
 
-    const {ObjectPrototype} = options;
+    const { ObjectPrototype } = options;
 
     if (isConst) {
 
         const object = Object.create(ObjectPrototype);
 
-        items.forEach(({name, value}) => {
+        items.forEach(({ name, value }) => {
             object[name] = evalConst(value);
         });
 
@@ -57,7 +57,7 @@ export function ObjectLiteral(expr: Expression.Any, options: CompilerOptions, co
 
         for (let i = 0; i < length; i++) {
 
-            const {name, value} = items[i];
+            const { name, value } = items[i];
             let itemName = name;
 
             if (typeof name === 'function') {

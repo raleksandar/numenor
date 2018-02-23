@@ -46,12 +46,14 @@ export function BinaryOperation(expr: Expression.Any, options: CompilerOptions, 
 
     if (expr.operator === TokenType.EqEq) {
         return maybeConst(lhs, rhs, (context, stack) => {
+            // tslint:disable-next-line:triple-equals
             return lhs(context, stack) == rhs(context, stack);
         });
     }
 
     if (expr.operator === TokenType.BangEq) {
         return maybeConst(lhs, rhs, (context, stack) => {
+            // tslint:disable-next-line:triple-equals
             return lhs(context, stack) != rhs(context, stack);
         });
     }

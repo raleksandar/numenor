@@ -47,7 +47,7 @@ export function makeAssignmentParselet<T extends TokenType.Any>(operator: T): In
             lhs,
             rhs,
         };
-    }
+    };
 
     return makeInfix(parselet, AssignmentPrecedence);
 }

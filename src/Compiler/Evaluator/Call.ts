@@ -25,7 +25,7 @@ export function Call(expr: Expression.Any, options: CompilerOptions, compile: Ev
         return arg;
     });
 
-    const {length} = args;
+    const { length } = args;
     const marshallValue = makeValueMarshaller(options);
 
     const evaluator = (context: EvaluatorContext, stack: Stack) => {

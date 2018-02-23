@@ -22,11 +22,11 @@ export function makeProtoPropQuery(options: CompilerOptions): PropQuery {
         }
 
         return prop in obj;
-    }
+    };
 }
 
 export const hasOwnProp: PropQuery = (obj, prop) => {
-    return prop !== '__proto__'  && ownProp.call(obj, prop);
+    return prop !== '__proto__' && ownProp.call(obj, prop);
 };
 
 export function makeProtoPropGetter(options: CompilerOptions): Getter {
@@ -65,4 +65,4 @@ export function makeValueMarshaller(options: CompilerOptions) {
 
 export function bindFunction(fn: () => any, thisArg: any): () => any {
     return bind.call(fn, thisArg);
-};
+}

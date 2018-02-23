@@ -4,6 +4,12 @@
         "tslint-clean-code"
     ],
     "rules": {
-        "quotemark": [true, "single"]
+        "quotemark": [true, "single", "avoid-escape"],
+        "semicolon": [true, "always"],
+        "indent": [true, "spaces", 4],
+        "ter-indent": false,
+        "space-before-function-paren": [true, {"anonymous": "never", "named": "never", "asyncArrow": "always"}],
+        "trailing-comma": [true, "always"],
+        "no-string-throw": false
     }
 }

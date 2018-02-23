@@ -18,9 +18,7 @@ export interface Parser {
      * @returns {Expr}
      * @memberof Parser
      */
-    parse(): Expr;
-    parse(precedence: Precedence): Expr;
-
+    parse(precedence?: Precedence): Expr;
 
     /**
      * Returns true if the current token matches given type.
@@ -40,7 +38,6 @@ export interface Parser {
      * @memberof Parser
      */
     accept(tokenType: TokenType.Any): boolean;
-
 
     /**
      * Returns current token and then advances to the next token.
@@ -71,10 +68,10 @@ export interface Parser {
 }
 
 export interface Prefix {
-    (parser: Parser, token: Token): Expr;
+    (parser: Parser, token: Token, context?: any): Expr;
 }
 
-export type InfixFn = (parser: Parser, lhs: Expr, token: Token) => Expr;
+export type InfixFn = (parser: Parser, lhs: Expr, token: Token, context?: any) => Expr;
 
 export interface Infix extends InfixFn {
     readonly precedence: Precedence;

@@ -11,7 +11,7 @@ export function MemberAccess(expr: Expression.Any, options: CompilerOptions, com
     }
 
     const lhs = compile(expr.lhs, options, compile);
-    const {name} = expr;
+    const { name } = expr;
 
     if (name === '__proto__') {
         return markAsConst(() => { throw new TypeError(CannotAccessProto); });

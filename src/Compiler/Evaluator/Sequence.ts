@@ -11,11 +11,11 @@ export function Sequence(expr: Expression.Any, options: CompilerOptions, compile
 
     const expressions = expr.expressions
         .map((e) => compile(e, options, compile))
-        .filter((e, index, {length}) => {
+        .filter((e, index, { length }) => {
             return index === length - 1 || !hasConstValue(e as Evaluator);
         });
 
-    const {length} = expressions;
+    const { length } = expressions;
 
     if (length === 1) {
         return expressions[length - 1];

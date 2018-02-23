@@ -26,8 +26,8 @@ export const ObjectLiteral: Prefix = (parser, token) => {
                 break;
             }
 
-            let name: Expression,
-                value: Expression;
+            let name: Expression;
+            let value: Expression;
 
             const computedPropertyName = parser.accept(TokenType.LBracket);
 

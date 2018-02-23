@@ -60,4 +60,4 @@ export const Identifier: Scanner = (start, line, col, context) => {
         line,
         col,
     };
-}
+};

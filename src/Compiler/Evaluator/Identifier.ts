@@ -10,7 +10,7 @@ export function Identifier(expr: Expression.Any, options: CompilerOptions, compi
         throw new TypeError(UnknownExpression(expr));
     }
 
-    const {name} = expr;
+    const { name } = expr;
 
     if (name === '__proto__') {
         return markAsConst(() => { throw new TypeError(CannotAccessProto); });

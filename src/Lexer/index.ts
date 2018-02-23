@@ -29,15 +29,11 @@ export abstract class Lexer {
 
     constructor() {
         this.scanners = [];
-        this.state = {offset: 0, line: 1, col: 0};
+        this.state = { offset: 0, line: 1, col: 0 };
         this.input = '';
         this.end = 0;
-        this.currentToken = {type: TokenType.EOF, line: 1, col: 0};
-        this.nextToken = {type: TokenType.EOF, line: 1, col: 0};
-    }
-
-    protected addScanner(scanner: Scanner) {
-        this.scanners.push(scanner);
+        this.currentToken = { type: TokenType.EOF, line: 1, col: 0 };
+        this.nextToken = { type: TokenType.EOF, line: 1, col: 0 };
     }
 
     get currentState() {
@@ -127,16 +123,20 @@ export abstract class Lexer {
         return current;
     }
 
+    protected addScanner(scanner: Scanner) {
+        this.scanners.push(scanner);
+    }
+
     private scan(): Token {
 
-        const {line, col} = this.state;
+        const { line, col } = this.state;
 
         if (!this.scannerContext || this.state.offset >= this.end) {
-            return {type: TokenType.EOF, line, col};
+            return { type: TokenType.EOF, line, col };
         }
 
         const start = this.scannerContext.start();
-        const {length} = this.scanners;
+        const { length } = this.scanners;
 
         for (let i = 0; i < length; i++) {
             try {
@@ -162,6 +162,6 @@ export abstract class Lexer {
             }
         }
 
-        return {type: TokenType.Unknown, raw: start, line, col};
+        return { type: TokenType.Unknown, raw: start, line, col };
     }
 }

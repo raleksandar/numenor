@@ -30,12 +30,6 @@ class ParserContext implements Parselet.Parser {
         this.skipIgnored();
     }
 
-    private skipIgnored() {
-        while (this.ignored.has(this.lexer.token.type)) {
-            this.lexer.next();
-        }
-    }
-
     get token(): Token {
         if (this.queue.length > 0) {
             return this.queue.shift()!;
@@ -103,6 +97,12 @@ class ParserContext implements Parselet.Parser {
         }
         return this.shift();
     }
+
+    private skipIgnored() {
+        while (this.ignored.has(this.lexer.token.type)) {
+            this.lexer.next();
+        }
+    }
 }
 
 export abstract class Parser {
@@ -121,18 +121,6 @@ export abstract class Parser {
             line: 1,
             col: 0,
         };
-    }
-
-    protected setPrefix(tokenType: TokenType.Any, parser: Parselet.Prefix) {
-        this.prefix.set(tokenType, parser);
-    }
-
-    protected setInfix(tokenType: TokenType.Any, parser: Parselet.Infix) {
-        this.infix.set(tokenType, parser);
-    }
-
-    protected ignore(tokenType: TokenType.Any) {
-        this.ignored.add(tokenType);
     }
 
     get state(): LexerState {
@@ -163,5 +151,17 @@ export abstract class Parser {
         }
 
         return expression;
+    }
+
+    protected setPrefix(tokenType: TokenType.Any, parser: Parselet.Prefix) {
+        this.prefix.set(tokenType, parser);
+    }
+
+    protected setInfix(tokenType: TokenType.Any, parser: Parselet.Infix) {
+        this.infix.set(tokenType, parser);
+    }
+
+    protected ignore(tokenType: TokenType.Any) {
+        this.ignored.add(tokenType);
     }
 }

@@ -5,7 +5,7 @@ import { TokenType } from '../';
 export function makePunctuationScanner(lexeme: string, type: TokenType.Any): Scanner {
 
     const chars = lexeme.split('');
-    const {length} = chars;
+    const { length } = chars;
 
     if (length === 0) {
         throw new Error('You must specify at least one punctuation character');
@@ -19,7 +19,7 @@ export function makePunctuationScanner(lexeme: string, type: TokenType.Any): Sca
 
         context.advance(length);
 
-        return {type, line, col} as Token;
+        return { type, line, col } as Token;
     };
 }
 
@@ -47,7 +47,7 @@ function acceptPunctuation(chars: string[], context: ScannerContext): boolean {
         return false;
     }
 
-    const {length} = chars;
+    const { length } = chars;
 
     for (let i = 1; i < length; i++) {
         if (context.peek(i) !== chars[i]) {

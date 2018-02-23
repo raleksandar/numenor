@@ -36,10 +36,6 @@ export abstract class Compiler {
 
     private compilers: Map<ExpressionType.Any, EvaluatorFactory> = new Map();
 
-    protected setCompiler(expressionType: ExpressionType.Any, compiler: EvaluatorFactory) {
-        this.compilers.set(expressionType, compiler);
-    }
-
     compile(expression: Expression.Any, options?: CompilerOptions): Evaluator {
 
         const compile: EvaluatorFactory = (expr, opts) => {
@@ -53,12 +49,16 @@ export abstract class Compiler {
             return factory(expr, opts, compile);
         };
 
-        const compileOptions = {...DefaultOptions, ...options};
+        const compileOptions = { ...DefaultOptions, ...options };
         const evaluator = compile(expression, compileOptions, compile);
         const marshallValue = makeValueMarshaller(compileOptions);
 
         return (context?: EvaluatorContext) => {
             return marshallValue(evaluator(context || EmptyContext, []));
         };
+    }
+
+    protected setCompiler(expressionType: ExpressionType.Any, compiler: EvaluatorFactory) {
+        this.compilers.set(expressionType, compiler);
     }
 }

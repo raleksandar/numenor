@@ -19,7 +19,7 @@ export const Whitespace: Scanner = (start, line, col, context) => {
         line,
         col,
     };
-}
+};
 
 export const LineTerminator: Scanner = (start, line, col, context) => {
 
@@ -42,4 +42,4 @@ export const LineTerminator: Scanner = (start, line, col, context) => {
         line,
         col,
     };
-}
+};

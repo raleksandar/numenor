@@ -37,7 +37,7 @@ export function makePostfixOperatorParselet<T extends TokenType.UnaryOperator>(
             lhs,
             operator,
         };
-    }
+    };
 
     return makeInfix(parselet, precedence);
 }
@@ -123,7 +123,7 @@ export function makePostfixAccessMutatorParselet<T extends TokenType.BinaryOpera
                 type: ExpressionType.StackPop,
             }],
         };
-    }
+    };
 
     return makeInfix(parselet, precedence);
 }

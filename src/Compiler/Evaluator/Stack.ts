@@ -35,10 +35,10 @@ export function StackRef(expr: Expression.Any, options: CompilerOptions, compile
         throw new TypeError(UnknownExpression(expr));
     }
 
-    const {offset} = expr;
+    const { offset } = expr;
 
     return (context: EvaluatorContext, stack: Stack) => {
-        const {length} = stack;
+        const { length } = stack;
         const index = length - offset;
         if (index >= 0 && index < length) {
             return stack[index];

@@ -9,9 +9,10 @@ export const StringLiteral: Scanner = (start, line, col, context) => {
         return false;
     }
 
-    let ch, value = '';
+    let ch = context.advance();
+    let value = '';
 
-    while ((ch = context.advance()) !== start) {
+    while (ch !== start) {
         if (ch === '\\') {
             ch = context.advance();
             value += handleEscapeSequence(context);
@@ -20,6 +21,7 @@ export const StringLiteral: Scanner = (start, line, col, context) => {
         } else {
             value += ch;
         }
+        ch = context.advance();
     }
 
     context.advance();
@@ -30,7 +32,7 @@ export const StringLiteral: Scanner = (start, line, col, context) => {
         value,
         line,
         col,
-    }
+    };
 };
 
 const escapes = new Map<string, string>();

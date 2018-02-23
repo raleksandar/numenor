@@ -31,7 +31,7 @@ export function makeBinaryOperatorParselet<T extends TokenType.BinaryOperator>(
             rhs,
             operator,
         };
-    }
+    };
 
     return makeInfix(parselet, precedence);
 }

@@ -5,7 +5,7 @@ function str(exprType: ExpressionType.Any): string {
     return exprType.toString().replace(/^.+?\((.+?)\)/, '$1');
 }
 
-export const UnknownExpression = ({type}: Expression.Any) => (
+export const UnknownExpression = ({ type }: Expression.Any) => (
     `Unknown expression type ${str(type)}`
 );
 

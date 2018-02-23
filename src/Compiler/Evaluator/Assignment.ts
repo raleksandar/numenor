@@ -26,7 +26,7 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
 
     if (expr.lhs.type === ExpressionType.Identifier) {
 
-        const {name} = expr.lhs;
+        const { name } = expr.lhs;
 
         if (options.NoNewVars) {
             return (context: EvaluatorContext, stack: Stack) => {
@@ -48,7 +48,7 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
 
     if (expr.lhs.type === ExpressionType.MemberAccess) {
 
-        const {name} = expr.lhs;
+        const { name } = expr.lhs;
         const lhs = compile(expr.lhs.lhs, options, compile);
 
         const evaluator = (context: EvaluatorContext, stack: Stack) => {
