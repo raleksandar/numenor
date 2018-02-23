@@ -1,4 +1,4 @@
-import { InternalEvaluator, EvaluatorContext, markAsConst, Stack, hasConstValue, Evaluator } from './';
+import { InternalEvaluator, EvaluatorContext, Stack } from './';
 import { CompilerOptions, EvaluatorFactory } from '../';
 import { Expression, ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
@@ -11,17 +11,11 @@ export function StackPush(expr: Expression.Any, options: CompilerOptions, compil
 
     const rhs = compile(expr.rhs, options, compile);
 
-    const evaluator = (context: EvaluatorContext, stack: Stack) => {
+    return (context: EvaluatorContext, stack: Stack) => {
         const value = rhs(context, stack);
         stack.push(value);
         return value;
     };
-
-    if (hasConstValue(evaluator as Evaluator)) {
-        return markAsConst(evaluator);
-    }
-
-    return evaluator;
 }
 
 export function StackPop(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
