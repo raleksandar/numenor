@@ -30,6 +30,41 @@ describe('ExpressionParser', () => {
         expect(expr.value).toBe('hello world!');
     });
 
+    it('Parses array expression', () => {
+        const expr = parser.parse('[1, 2, 3,]') as Expression.Array;
+        expect(expr.type).toBe(ExpressionType.ArrayLiteral);
+        expect(expr.items).toEqual([
+            { type: ExpressionType.NumberLiteral, value: 1 },
+            { type: ExpressionType.NumberLiteral, value: 2 },
+            { type: ExpressionType.NumberLiteral, value: 3 },
+        ]);
+    });
+
+    it('Parses object expression', () => {
+        const expr = parser.parse('{ a: 1, b: 2, }') as Expression.Object;
+        expect(expr.type).toBe(ExpressionType.ObjectLiteral);
+        expect(expr.items).toEqual([
+            {
+                name: { type: ExpressionType.StringLiteral, value: 'a' },
+                value: { type: ExpressionType.NumberLiteral, value: 1 },
+            },
+            {
+                name: { type: ExpressionType.StringLiteral, value: 'b' },
+                value: { type: ExpressionType.NumberLiteral, value: 2 },
+            },
+        ]);
+    });
+
+    it('Parses call expression', () => {
+        const expr = parser.parse('fn(1, 2,)') as Expression.Call;
+        expect(expr.type).toBe(ExpressionType.Call);
+        expect(expr.lhs).toEqual({ type: ExpressionType.Identifier, name: 'fn' });
+        expect(expr.args).toEqual([
+            { type: ExpressionType.NumberLiteral, value: 1 },
+            { type: ExpressionType.NumberLiteral, value: 2 },
+        ]);
+    });
+
     it('Supports scope:enter and scope:leave events', () => {
 
         const args: any[] = [];

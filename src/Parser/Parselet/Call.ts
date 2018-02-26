@@ -17,11 +17,10 @@ const parselet: InfixFn = (parser, lhs, token) => {
 
         do {
             // support trailing comma
-            if (parser.match(TokenType.Comma)) {
-                const comma = parser.shift();
+            if (parser.match(TokenType.RParen)) {
                 // but not (,)
-                if (parser.match(TokenType.RParen)) {
-                    throw new SyntaxError(UnknownToken(comma));
+                if (args.length === 0) {
+                    throw new SyntaxError(UnknownToken(parser.token));
                 }
                 break;
             }

@@ -17,11 +17,10 @@ export const ArrayLiteral: Prefix = (parser, token) => {
 
         do {
             // support trailing comma
-            if (parser.match(TokenType.Comma)) {
-                const comma = parser.shift();
+            if (parser.match(TokenType.RBracket)) {
                 // but not [,]
-                if (parser.match(TokenType.RBracket)) {
-                    throw new SyntaxError(UnknownToken(comma));
+                if (items.length === 0) {
+                    throw new SyntaxError(UnknownToken(parser.token));
                 }
                 break;
             }
