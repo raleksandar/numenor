@@ -21,6 +21,7 @@ export abstract class Lexer {
 
     private readonly scanners: Scanner[];
     private state: LexerState;
+    private lastState: LexerState;
     private input: string;
     private end: number;
     private nextToken: Token;
@@ -30,14 +31,15 @@ export abstract class Lexer {
     constructor() {
         this.scanners = [];
         this.state = { offset: 0, line: 1, col: 0 };
+        this.lastState = this.state;
         this.input = '';
         this.end = 0;
         this.currentToken = { type: TokenType.EOF, ...this.state, lexeme: '' };
-        this.nextToken = { type: TokenType.EOF, ...this.state, lexeme: '' };
+        this.nextToken = this.currentToken;
     }
 
     get currentState() {
-        return this.state;
+        return this.lastState;
     }
 
     set currentState(state: LexerState) {
@@ -118,6 +120,8 @@ export abstract class Lexer {
     }
 
     next(): Token {
+        const { offset, line, col } = this.nextToken;
+        this.lastState = { offset, line, col };
         this.currentToken = this.nextToken;
         this.nextToken = this.scan();
         return this.currentToken;
