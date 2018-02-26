@@ -4,6 +4,7 @@ import * as Parselet from './Parselet';
 import * as Precedence from './Precedence';
 import * as Error from './Error';
 import * as ExpressionType from './ExpressionType';
+import { EventEmitter } from '../common/EventEmitter';
 
 export {
     Expression,
@@ -19,9 +20,11 @@ type TokenSet = Set<TokenType.Any>;
 
 class ParserContext implements Parselet.Parser {
 
-    private queue: Token[] = [];
+    private readonly queue: Token[] = [];
+    private readonly scopeStack: TokenType.Any[] = [];
 
     constructor(
+        private readonly fireEvent: (event: string, ...params: any[]) => void,
         private readonly lexer: Lexer,
         private readonly prefix: PrefixParsers,
         private readonly infix: InfixParsers,
@@ -49,7 +52,12 @@ class ParserContext implements Parselet.Parser {
             throw new SyntaxError(Error.UnknownToken(token));
         }
 
+        this.scopeStack.push(token.type);
+        this.fireEvent('scope:enter', token.type, this.scopeStack);
+
         let expression = parser(this, token, this.context);
+
+        this.fireEvent('scope:leave', this.scopeStack.pop(), this.scopeStack);
 
         while (true) {
 
@@ -107,7 +115,7 @@ class ParserContext implements Parselet.Parser {
     }
 }
 
-export abstract class Parser {
+export abstract class Parser extends EventEmitter {
 
     parseletContext: any;
 
@@ -117,6 +125,7 @@ export abstract class Parser {
     private lexerState: LexerState;
 
     constructor(private readonly lexer: Lexer) {
+        super();
         this.prefix = new Map();
         this.infix = new Map();
         this.ignored = new Set();
@@ -140,6 +149,7 @@ export abstract class Parser {
         this.lexer.initialize(input, state);
 
         const parserContext = new ParserContext(
+            this.fireEvent.bind(this),
             this.lexer,
             this.prefix,
             this.infix,
