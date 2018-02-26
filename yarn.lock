@@ -3567,9 +3567,9 @@ tslib@^1.0.0, tslib@^1.7.1, tslib@^1.8.0, tslib@^1.8.1:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.0.tgz#e37a86fda8cbbaf23a057f473c9f4dc64e5fc2e8"
 
-tslint-clean-code@^0.2.3:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/tslint-clean-code/-/tslint-clean-code-0.2.3.tgz#52da1fcf9c29ae41253c6c3e8d3456d4b8c8f38d"
+tslint-clean-code@^0.2.4:
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/tslint-clean-code/-/tslint-clean-code-0.2.4.tgz#33f4725efc0a1d1be36061636ea1252a754961c5"
   dependencies:
     memoize-decorator "^1.0.2"
     tsutils "2.7.1"

@@ -71,7 +71,7 @@
     "trash-cli": "^1.4.0",
     "tsc": "^1.20150623.0",
     "tslint": "^5.9.1",
-    "tslint-clean-code": "^0.2.3",
+    "tslint-clean-code": "^0.2.4",
     "tslint-config-standard": "^7.0.0",
     "typescript": "^2.7.2"
   }
