@@ -59,6 +59,13 @@ class ParserContext implements Parselet.Parser {
 
         this.fireEvent('scope:leave', this.scopeStack.pop(), this.scopeStack);
 
+        this.fireEvent('node', {
+            get node() { return expression; },
+            replaceWith: (expr: Expression.Any) => {
+                expression = expr;
+            },
+        });
+
         while (true) {
 
             const parser = this.infix.get(this.token.type);

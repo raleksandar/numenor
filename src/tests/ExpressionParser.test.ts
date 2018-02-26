@@ -64,4 +64,41 @@ describe('ExpressionParser', () => {
         expect(args).toEqual([]);
     });
 
+    it('Supports node event', () => {
+
+        const listener = ({ node }: { node: Expression.Any }) => {
+            expect(node).toEqual({
+                type: ExpressionType.NumberLiteral,
+                value: 1000,
+            });
+        };
+
+        parser.addListener('node', listener);
+
+        parser.parse('1e3');
+
+        parser.removeListener('node', listener);
+    });
+
+    it('Supports replacing current node in node event listener', () => {
+
+        const listener = ({ replaceWith }: { replaceWith: (expr: Expression.Any) => void }) => {
+            expect(replaceWith).toBeInstanceOf(Function);
+            replaceWith({
+                type: ExpressionType.StringLiteral,
+                value: 'replaced!',
+            });
+        };
+
+        parser.addListener('node', listener);
+
+        const expr = parser.parse('1e3');
+
+        parser.removeListener('node', listener);
+
+        expect(expr).toEqual({
+            type: ExpressionType.StringLiteral,
+            value: 'replaced!',
+        });
+    });
 });
