@@ -2,7 +2,7 @@ import { Scanner } from './';
 import { TokenType } from '../';
 import { isWhitespace, isLineTerminator } from '../CharacterClass';
 
-export const Whitespace: Scanner = (start, line, col, context) => {
+export const Whitespace: Scanner = (start, position, context) => {
 
     if (!isWhitespace(start)) {
         return false;
@@ -16,12 +16,12 @@ export const Whitespace: Scanner = (start, line, col, context) => {
 
     return {
         type: TokenType.Whitespace,
-        line,
-        col,
+        lexeme: context.accept(),
+        ...position,
     };
 };
 
-export const LineTerminator: Scanner = (start, line, col, context) => {
+export const LineTerminator: Scanner = (start, position, context) => {
 
     if (!isLineTerminator(start)) {
         return false;
@@ -39,7 +39,7 @@ export const LineTerminator: Scanner = (start, line, col, context) => {
 
     return {
         type: TokenType.LineTerminator,
-        line,
-        col,
+        lexeme: context.accept(),
+        ...position,
     };
 };

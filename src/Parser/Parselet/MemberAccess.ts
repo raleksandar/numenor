@@ -15,14 +15,12 @@ const dot: InfixFn = (parser, lhs, token) => {
 
     if (currentToken.type === TokenType.Identifier) {
         name = currentToken.name;
-    } else if (currentToken.type === TokenType.In) {
-        name = 'in';
-    } else if (currentToken.type === TokenType.NullLiteral) {
-        name = 'null';
-    } else if (currentToken.type === TokenType.UndefinedLiteral) {
-        name = 'undefined';
-    } else if (currentToken.type === TokenType.BooleanLiteral) {
-        name = currentToken.raw;
+    } else if (currentToken.type === TokenType.In ||
+        currentToken.type === TokenType.NullLiteral ||
+        currentToken.type === TokenType.UndefinedLiteral ||
+        currentToken.type === TokenType.BooleanLiteral
+    ) {
+        name = currentToken.lexeme;
     } else {
         throw new SyntaxError(UnknownToken(currentToken));
     }

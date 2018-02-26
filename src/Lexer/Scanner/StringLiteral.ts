@@ -3,7 +3,7 @@ import { TokenType } from '../';
 import * as LexerError from '../Error';
 import { isLineTerminator, isHexDigit } from '../CharacterClass';
 
-export const StringLiteral: Scanner = (start, line, col, context) => {
+export const StringLiteral: Scanner = (start, position, context) => {
 
     if (start !== '"' && start !== "'") {
         return false;
@@ -28,10 +28,9 @@ export const StringLiteral: Scanner = (start, line, col, context) => {
 
     return {
         type: TokenType.StringLiteral,
-        raw: context.accept(),
+        lexeme: context.accept(),
         value,
-        line,
-        col,
+        ...position,
     };
 };
 

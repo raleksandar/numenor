@@ -7,18 +7,18 @@ const HexLiteral = lex(16, isHexDigit, LexerError.ExpectedHexadecimalDigit);
 const OctalLiteral = lex(8, isOctalDigit, LexerError.ExpectedOctalDigit);
 const BinaryLiteral = lex(2, isBinaryDigit, LexerError.ExpectedBinaryDigit);
 
-export const NumberLiteral: Scanner = (start, line, col, context) => {
+export const NumberLiteral: Scanner = (start, position, context) => {
 
     if (start === '0') {
         const nextCh = context.peek();
         if (nextCh === 'x') {
-            return HexLiteral(context.advance(2), line, col, context);
+            return HexLiteral(context.advance(2), position, context);
         }
         if (nextCh === 'o') {
-            return OctalLiteral(context.advance(2), line, col, context);
+            return OctalLiteral(context.advance(2), position, context);
         }
         if (nextCh === 'b') {
-            return BinaryLiteral(context.advance(2), line, col, context);
+            return BinaryLiteral(context.advance(2), position, context);
         }
     }
 
@@ -27,11 +27,10 @@ export const NumberLiteral: Scanner = (start, line, col, context) => {
         const value = Number.parseFloat('0.' + handleFloat(context));
         return {
             type: TokenType.NumberLiteral,
-            raw: context.accept(),
+            lexeme: context.accept(),
             radix: 10,
             value,
-            line,
-            col,
+            ...position,
         };
     }
 
@@ -78,10 +77,9 @@ export const NumberLiteral: Scanner = (start, line, col, context) => {
     return {
         type: TokenType.NumberLiteral,
         value: Number.parseFloat(value),
-        raw: context.accept(),
+        lexeme: context.accept(),
         radix: 10,
-        line,
-        col,
+        ...position,
     };
 };
 
@@ -157,7 +155,7 @@ function handleExponent(context: ScannerContext): string {
 }
 
 function lex(radix: number, isValidDigit: (ch: string) => boolean, error: string): Scanner {
-    return (start, line, col, context) => {
+    return (start, position, context) => {
 
         let ch = start;
         let value = '';
@@ -182,10 +180,9 @@ function lex(radix: number, isValidDigit: (ch: string) => boolean, error: string
         return {
             type: TokenType.NumberLiteral,
             value: Number.parseInt(value, radix),
-            raw: context.accept(),
-            col,
-            line,
+            lexeme: context.accept(),
             radix,
+            ...position,
         };
     };
 }

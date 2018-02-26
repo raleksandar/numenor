@@ -1,4 +1,4 @@
-import { Any as Token } from '../Token';
+import { Any as Token, TokenPosition } from '../Token';
 
 export interface ScannerContext {
     current(): string;
@@ -10,5 +10,5 @@ export interface ScannerContext {
 }
 
 export interface Scanner {
-    (start: string, line: number, col: number, context: ScannerContext): Token | false;
+    (start: string, position: TokenPosition, context: ScannerContext): Token | false;
 }

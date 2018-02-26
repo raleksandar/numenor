@@ -26,7 +26,7 @@ describe('Lexer', () => {
         const token = tokens[0];
         if (token.type === TokenType.NumberLiteral) {
             expect(token.radix).toBe(10);
-            expect(token.raw).toBe('123');
+            expect(token.lexeme).toBe('123');
             expect(token.value).toBe(123);
         }
         expect(tokens[1].type).toBe(TokenType.EOF);
@@ -39,7 +39,7 @@ describe('Lexer', () => {
         const token = tokens[0];
         if (token.type === TokenType.NumberLiteral) {
             expect(token.radix).toBe(10);
-            expect(token.raw).toBe('1_234_567');
+            expect(token.lexeme).toBe('1_234_567');
             expect(token.value).toBe(1234567);
         }
         expect(tokens[1].type).toBe(TokenType.EOF);
@@ -51,7 +51,7 @@ describe('Lexer', () => {
         expect(tokens[0].type).toBe(TokenType.Invalid);
         const token = tokens[0];
         if (token.type === TokenType.Invalid) {
-            expect(token.raw).toBe('1_234_567_');
+            expect(token.lexeme).toBe('1_234_567_');
             expect(token.error).toBe(LexerError.TrailingSeparator);
         }
         expect(tokens[1].type).toBe(TokenType.EOF);
@@ -64,7 +64,7 @@ describe('Lexer', () => {
         const token = tokens[0];
         if (token.type === TokenType.NumberLiteral) {
             expect(token.radix).toBe(10);
-            expect(token.raw).toBe('123.45');
+            expect(token.lexeme).toBe('123.45');
             expect(token.value).toBe(123.45);
         }
         expect(tokens[1].type).toBe(TokenType.EOF);
@@ -77,7 +77,7 @@ describe('Lexer', () => {
         const token = tokens[0];
         if (token.type === TokenType.NumberLiteral) {
             expect(token.radix).toBe(10);
-            expect(token.raw).toBe('.45');
+            expect(token.lexeme).toBe('.45');
             expect(token.value).toBe(0.45);
         }
         expect(tokens[1].type).toBe(TokenType.EOF);
@@ -90,7 +90,7 @@ describe('Lexer', () => {
         const token = tokens[0];
         if (token.type === TokenType.NumberLiteral) {
             expect(token.radix).toBe(10);
-            expect(token.raw).toBe('123_456.78');
+            expect(token.lexeme).toBe('123_456.78');
             expect(token.value).toBe(123456.78);
         }
         expect(tokens[1].type).toBe(TokenType.EOF);
@@ -102,7 +102,7 @@ describe('Lexer', () => {
         expect(tokens[0].type).toBe(TokenType.Invalid);
         const token = tokens[0];
         if (token.type === TokenType.Invalid) {
-            expect(token.raw).toBe('123_456.78_');
+            expect(token.lexeme).toBe('123_456.78_');
             expect(token.error).toBe(LexerError.TrailingSeparator);
         }
         expect(tokens[1].type).toBe(TokenType.EOF);
@@ -114,14 +114,14 @@ describe('Lexer', () => {
         expect(tokens[0].type).toBe(TokenType.Invalid);
         const invalidToken = tokens[0];
         if (invalidToken.type === TokenType.Invalid) {
-            expect(invalidToken.raw).toBe('123_456_.');
+            expect(invalidToken.lexeme).toBe('123_456_.');
             expect(invalidToken.error).toBe(LexerError.SeparatorBeforePeriod);
         }
         expect(tokens[1].type).toBe(TokenType.NumberLiteral);
         const numericToken = tokens[1];
         if (numericToken.type === TokenType.NumberLiteral) {
             expect(numericToken.radix).toBe(10);
-            expect(numericToken.raw).toBe('78');
+            expect(numericToken.lexeme).toBe('78');
             expect(numericToken.value).toBe(78);
         }
         expect(tokens[2].type).toBe(TokenType.EOF);
@@ -133,14 +133,14 @@ describe('Lexer', () => {
         expect(tokens[0].type).toBe(TokenType.Invalid);
         const invalidToken = tokens[0];
         if (invalidToken.type === TokenType.Invalid) {
-            expect(invalidToken.raw).toBe('123_456._');
+            expect(invalidToken.lexeme).toBe('123_456._');
             expect(invalidToken.error).toBe(LexerError.SeparatorAfterPeriod);
         }
         expect(tokens[1].type).toBe(TokenType.NumberLiteral);
         const numericToken = tokens[1];
         if (numericToken.type === TokenType.NumberLiteral) {
             expect(numericToken.radix).toBe(10);
-            expect(numericToken.raw).toBe('78');
+            expect(numericToken.lexeme).toBe('78');
             expect(numericToken.value).toBe(78);
         }
         expect(tokens[2].type).toBe(TokenType.EOF);

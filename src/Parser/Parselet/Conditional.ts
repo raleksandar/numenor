@@ -96,6 +96,8 @@ const access: InfixFn = (parser, lhs, token, context) => {
     } else {
         const dot: Token = {
             type: TokenType.Dot,
+            lexeme: '.',
+            offset: token.offset,
             line: token.line,
             col: token.col,
         };

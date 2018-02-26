@@ -27,6 +27,8 @@ export function makeAssignmentParselet<T extends TokenType.Any>(operator: T): In
             // a ??= b => a = a ?? b => a = (#push(a), #ref(1) != null ? #pop() : (#pop(), b))
             const qq: Token = {
                 type: TokenType.QuestionQuestion,
+                lexeme: '??',
+                offset: token.offset,
                 line: token.line,
                 col: token.col,
             };

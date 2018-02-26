@@ -1,4 +1,4 @@
-import { Any as Token } from './Token';
+import { Any as Token, TokenPosition } from './Token';
 import * as TokenType from './TokenType';
 import * as LexerError from './Error';
 import { Scanner, ScannerContext } from './Scanner';
@@ -32,12 +32,18 @@ export abstract class Lexer {
         this.state = { offset: 0, line: 1, col: 0 };
         this.input = '';
         this.end = 0;
-        this.currentToken = { type: TokenType.EOF, line: 1, col: 0 };
-        this.nextToken = { type: TokenType.EOF, line: 1, col: 0 };
+        this.currentToken = { type: TokenType.EOF, ...this.state, lexeme: '' };
+        this.nextToken = { type: TokenType.EOF, ...this.state, lexeme: '' };
     }
 
     get currentState() {
         return this.state;
+    }
+
+    set currentState(state: LexerState) {
+        this.state = Object.assign(Object.create(null), state);
+        this.nextToken = this.scan();
+        this.currentToken = this.next();
     }
 
     initialize(input: string, state?: LexerState, length: number = 0) {
@@ -46,9 +52,10 @@ export abstract class Lexer {
             state = InitialLexerState;
         }
 
-        this.state = Object.assign(Object.create(null), state);
+        const offset = state.offset || 0;
+
         this.input = input;
-        this.end = state.offset + (length !== 0 ? length : input.length - state.offset);
+        this.end = offset + (length !== 0 ? length : input.length - offset);
 
         let ch: string;
         let startOffset: number;
@@ -93,8 +100,7 @@ export abstract class Lexer {
             },
         };
 
-        this.nextToken = this.scan();
-        this.currentToken = this.next();
+        this.currentState = state;
     }
 
     get token() {
@@ -129,10 +135,11 @@ export abstract class Lexer {
 
     private scan(): Token {
 
-        const { line, col } = this.state;
+        const { line, col, offset } = this.state;
+        const position: TokenPosition = { line, col, offset };
 
         if (!this.scannerContext || this.state.offset >= this.end) {
-            return { type: TokenType.EOF, line, col };
+            return { type: TokenType.EOF, ...position, lexeme: '' };
         }
 
         const start = this.scannerContext.start();
@@ -140,7 +147,7 @@ export abstract class Lexer {
 
         for (let i = 0; i < length; i++) {
             try {
-                const token = this.scanners[i](start, line, col, this.scannerContext);
+                const token = this.scanners[i](start, position, this.scannerContext);
                 if (token !== false) {
                     this.state.offset--;
                     if (this.state.col > 0) {
@@ -154,14 +161,13 @@ export abstract class Lexer {
                 }
                 return {
                     type: TokenType.Invalid,
-                    raw: this.scannerContext.accept(+1),
-                    line: this.state.line,
-                    col: this.state.offset,
+                    lexeme: this.scannerContext.accept(+1),
+                    ...position,
                     error,
                 };
             }
         }
 
-        return { type: TokenType.Unknown, raw: start, line, col };
+        return { type: TokenType.Unknown, lexeme: start, ...position };
     }
 }

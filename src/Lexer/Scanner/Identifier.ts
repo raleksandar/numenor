@@ -2,7 +2,7 @@ import { Scanner } from './';
 import { TokenType } from '../';
 import { isIdentStart, isIdentPart } from '../CharacterClass';
 
-export const Identifier: Scanner = (start, line, col, context) => {
+export const Identifier: Scanner = (start, position, context) => {
 
     if (!isIdentStart(start)) {
         return false;
@@ -19,45 +19,42 @@ export const Identifier: Scanner = (start, line, col, context) => {
     if (name === 'in') {
         return {
             type: TokenType.In,
-            line,
-            col,
+            lexeme: name,
+            ...position,
         };
     }
 
     if (name === 'true' || name === 'false') {
         return {
             type: TokenType.BooleanLiteral,
-            raw: name,
             value: name === 'true',
-            line,
-            col,
+            lexeme: name,
+            ...position,
         };
     }
 
     if (name === 'null') {
         return {
             type: TokenType.NullLiteral,
-            raw: name,
             value: null,
-            line,
-            col,
+            lexeme: name,
+            ...position,
         };
     }
 
     if (name === 'undefined') {
         return {
             type: TokenType.UndefinedLiteral,
-            raw: name,
             value: undefined,
-            line,
-            col,
+            lexeme: name,
+            ...position,
         };
     }
 
     return {
         type: TokenType.Identifier,
         name,
-        line,
-        col,
+        lexeme: name,
+        ...position,
     };
 };
