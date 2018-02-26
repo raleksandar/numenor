@@ -3,6 +3,7 @@ import { Evaluator, InternalEvaluator, EvaluatorContext, EmptyContext } from './
 import * as Error from './Error';
 import { ArrayPrototype } from './ArrayPrototype';
 import { makeValueMarshaller } from './Evaluator/util';
+import { EventEmitter } from '../common/EventEmitter';
 
 export interface CompilerOptions {
     NoUndefinedVars?: boolean;      // throws if referencing variable not defined in the context
@@ -32,25 +33,34 @@ const DefaultOptions: CompilerOptions = {
     Constants: Object.create(null),
 };
 
-export abstract class Compiler {
+export abstract class Compiler extends EventEmitter {
 
     private compilers: Map<ExpressionType.Any, EvaluatorFactory> = new Map();
 
     compile(expression: Expression.Any, options?: CompilerOptions): Evaluator {
 
-        const compile: EvaluatorFactory = (expr, opts) => {
+        const scopeStack: ExpressionType.Any[] = [];
 
-            const factory = this.compilers.get(expr.type);
+        const compile = (expr: Expression.Any, opts: CompilerOptions) => {
 
-            if (typeof factory === 'undefined') {
+            const makeEval = this.compilers.get(expr.type);
+
+            if (typeof makeEval === 'undefined') {
                 throw new TypeError(Error.UnknownExpression(expr));
             }
 
-            return factory(expr, opts, compile);
+            scopeStack.push(expr.type);
+            this.fireEvent('scope:enter', expr.type, scopeStack);
+
+            const evaluator = makeEval(expr, opts, compile);
+
+            this.fireEvent('scope:leave', expr.type, scopeStack, evaluator);
+
+            return evaluator;
         };
 
         const compileOptions = { ...DefaultOptions, ...options };
-        const evaluator = compile(expression, compileOptions, compile);
+        const evaluator = compile(expression, compileOptions);
         const marshallValue = makeValueMarshaller(compileOptions);
 
         return (context?: EvaluatorContext) => {
