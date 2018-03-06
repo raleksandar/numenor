@@ -65,6 +65,19 @@ describe('ExpressionParser', () => {
         ]);
     });
 
+    it('Parses sequence expression', () => {
+        const expr = parser.parse('1, 2, 3, 4');
+        expect(expr).toEqual({
+            type: ExpressionType.Sequence,
+            expressions: [
+                { type: ExpressionType.NumberLiteral, value: 1 },
+                { type: ExpressionType.NumberLiteral, value: 2 },
+                { type: ExpressionType.NumberLiteral, value: 3 },
+                { type: ExpressionType.NumberLiteral, value: 4 },
+            ],
+        });
+    });
+
     it('Supports scope:enter and scope:leave events', () => {
 
         const args: any[] = [];

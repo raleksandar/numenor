@@ -20,7 +20,7 @@ const parselet: InfixFn = (parser, lhs, token) => {
             throw new SyntaxError(UnknownToken(comma));
         }
 
-        expressions.push(parser.parse());
+        expressions.push(parser.parse(SequencePrecedence));
         comma = parser.token;
 
     } while (parser.accept(TokenType.Comma));
