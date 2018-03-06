@@ -15,7 +15,7 @@ export function makePrefixOperatorParselet<T extends TokenType.UnaryOperator>(op
 
         return {
             type: ExpressionType.PrefixOperation,
-            rhs: parser.parse(),
+            rhs: parser.parse(PrefixPrecedence - 1),
             operator,
         };
     };
