@@ -133,8 +133,12 @@ export abstract class Lexer {
         return current;
     }
 
-    protected addScanner(scanner: Scanner) {
+    protected appendScanner(scanner: Scanner) {
         this.scanners.push(scanner);
+    }
+
+    protected prependScanner(scanner: Scanner) {
+        this.scanners.unshift(scanner);
     }
 
     private scan(): Token {
