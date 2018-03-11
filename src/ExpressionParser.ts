@@ -12,6 +12,7 @@ import { Call } from './Parser/Parselet/Call';
 import { Group } from './Parser/Parselet/Group';
 import { ArrayLiteral } from './Parser/Parselet/ArrayLiteral';
 import { ObjectLiteral } from './Parser/Parselet/ObjectLiteral';
+import { Await } from './Parser/Parselet/Await';
 
 export class ExpressionParser extends Parser {
 
@@ -76,6 +77,7 @@ export class ExpressionParser extends Parser {
 
         this.setInfix(TokenType.StarStar, makeBinaryOperatorParselet(TokenType.StarStar, Precedence.Power, RightAssociative));
 
+        this.setPrefix(TokenType.Await, Await);
         this.setPrefix(TokenType.Bang, makePrefixOperatorParselet(TokenType.Bang));
         this.setPrefix(TokenType.Tilde, makePrefixOperatorParselet(TokenType.Tilde));
         this.setPrefix(TokenType.Plus, makePrefixOperatorParselet(TokenType.Plus));

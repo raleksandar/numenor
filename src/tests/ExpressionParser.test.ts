@@ -78,6 +78,38 @@ describe('ExpressionParser', () => {
         });
     });
 
+    it('Parses await expression', () => {
+
+        const expr = parser.parse('await fn()') as Expression.Await;
+        expect(expr.type).toBe(ExpressionType.Await);
+        expect(expr.rhs).toEqual({
+            type: ExpressionType.Call,
+            lhs: { type: ExpressionType.Identifier, name: 'fn' },
+            args: [],
+        });
+
+        expect(parser.parse('await foo() + await bar()')).toEqual({
+            type: ExpressionType.BinaryOperation,
+            operator: TokenType.Plus,
+            lhs: {
+                type: ExpressionType.Await,
+                rhs: {
+                    type: ExpressionType.Call,
+                    args: [],
+                    lhs: { type: ExpressionType.Identifier, name: 'foo' },
+                },
+            },
+            rhs: {
+                type: ExpressionType.Await,
+                rhs: {
+                    type: ExpressionType.Call,
+                    args: [],
+                    lhs: { type: ExpressionType.Identifier, name: 'bar' },
+                },
+            },
+        });
+    });
+
     it('Supports scope:enter and scope:leave events', () => {
 
         const args: any[] = [];

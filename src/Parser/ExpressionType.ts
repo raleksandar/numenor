@@ -15,6 +15,7 @@ export const BinaryOperation = Symbol('BinaryOperationExpression');
 export const PrefixOperation = Symbol('PrefixOperationExpression');
 export const PostfixOperation = Symbol('PostfixOperationExpression');
 export const Call = Symbol('CallExpression');
+export const Await = Symbol('AwaitExpression');
 export const Sequence = Symbol('SequenceExpression');
 export const MemberAccess = Symbol('MemberAccessExpression');
 export const ComputedMemberAccess = Symbol('ComputedMemberAccessExpression');
@@ -35,6 +36,7 @@ export type Primary = Value
     | typeof ArrayLiteral
     | typeof ObjectLiteral
     | typeof Call
+    | typeof Await
     | typeof MemberAccess
     | typeof ComputedMemberAccess;
 

@@ -91,6 +91,11 @@ export interface Call {
     readonly args: Any[];
 }
 
+export interface Await {
+    readonly type: typeof ExpressionType.Await;
+    readonly rhs: Any;
+}
+
 export interface Sequence {
     readonly type: typeof ExpressionType.Sequence;
     readonly expressions: Any[];
@@ -129,6 +134,7 @@ export type Primary = Value
     | Array
     | Object
     | Call
+    | Await
     | MemberAccess
     | ComputedMemberAccess;
 
