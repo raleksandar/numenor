@@ -47,7 +47,7 @@ export abstract class Compiler extends EventEmitter {
         const marshallValue = makeValueMarshaller(compileOptions);
 
         return (context?: EvaluatorContext) => {
-            return marshallValue(evaluator(context || EmptyContext, []));
+            return marshallValue(evaluator(context || Object.create(null), []));
         };
     }
 
