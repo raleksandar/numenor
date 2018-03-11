@@ -1,34 +1,35 @@
-import { InternalEvaluator, Stack, EvaluatorContext, hasConstValue, Evaluator } from './';
-import { CompilerOptions, EvaluatorFactory } from '../';
-import { Expression, ExpressionType } from '../../Parser';
+import { hasConstValue, EvaluatorFactory, hasAsyncValue, mark } from './';
+import { ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
+import { evalMaybeAsyncSteps } from './util';
 
-export function Sequence(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
+export const Sequence: EvaluatorFactory = (expr, options, compile) => {
 
     if (expr.type !== ExpressionType.Sequence) {
         throw new TypeError(UnknownExpression(expr));
     }
 
-    const expressions = expr.expressions
-        .map((e) => compile(e, options, compile))
-        .filter((e, index, { length }) => {
-            return index === length - 1 || !hasConstValue(e as Evaluator);
-        });
+    let isConst = true;
+    let isAsync = false;
 
-    const { length } = expressions;
+    const items = expr.expressions.map((itemExpr) => {
 
-    if (length === 1) {
-        return expressions[length - 1];
-    }
+        const item = compile(itemExpr, options, compile);
 
-    return (context: EvaluatorContext, stack: Stack) => {
-
-        let value: any;
-
-        for (let i = 0; i < length; i++) {
-            value = expressions[i](context, stack);
+        if (isConst && !hasConstValue(item)) {
+            isConst = false;
         }
 
-        return value;
-    };
-}
+        if (!isAsync && hasAsyncValue(item)) {
+            isAsync = true;
+        }
+
+        return item;
+    });
+
+    return mark({ isConst, isAsync }, (context, stack) => {
+        return evalMaybeAsyncSteps(context, stack, items).then((values) => {
+            return values[values.length - 1];
+        });
+    });
+};

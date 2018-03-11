@@ -1,11 +1,10 @@
-import { InternalEvaluator, hasConstValue, Evaluator, markAsConst } from './';
-import { CompilerOptions, EvaluatorFactory } from '../';
-import { Expression, ExpressionType } from '../../Parser';
+import { hasConstValue, mark, hasAsyncValue, EvaluatorFactory } from './';
+import { ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
 import { TokenType } from '../../Lexer';
-import { hasOwnProp, makeProtoPropQuery } from './util';
+import { hasOwnProp, makeProtoPropQuery, evalMaybeAsyncSteps } from './util';
 
-export function BinaryOperation(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
+export const BinaryOperation: EvaluatorFactory = (expr, options, compile) => {
 
     if (expr.type !== ExpressionType.BinaryOperation) {
         throw new TypeError(UnknownExpression(expr));
@@ -13,167 +12,82 @@ export function BinaryOperation(expr: Expression.Any, options: CompilerOptions, 
 
     const lhs = compile(expr.lhs, options, compile);
     const rhs = compile(expr.rhs, options, compile);
+    const isConst = hasConstValue(lhs) && hasConstValue(rhs);
 
-    if (expr.operator === TokenType.PipePipe) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) || rhs(context, stack);
-        });
-    }
+    // short-circuit operators require special approach
+    if (expr.operator === TokenType.PipePipe || expr.operator === TokenType.AmpAmp) {
 
-    if (expr.operator === TokenType.AmpAmp) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) && rhs(context, stack);
-        });
-    }
+        const isLHSAsync = hasAsyncValue(lhs);
+        const isRHSAsync = hasAsyncValue(rhs);
 
-    if (expr.operator === TokenType.Pipe) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) | rhs(context, stack);
-        });
-    }
+        if (!isLHSAsync && !isRHSAsync) {
+            return mark({ isConst }, (context, stack) => {
+                if (expr.operator === TokenType.PipePipe) {
+                    return lhs(context, stack) || rhs(context, stack);
+                }
+                return lhs(context, stack) && rhs(context, stack);
+            });
+        }
 
-    if (expr.operator === TokenType.Caret) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) ^ rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.Amp) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) & rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.EqEq) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            // tslint:disable-next-line:triple-equals
-            return lhs(context, stack) == rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.BangEq) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            // tslint:disable-next-line:triple-equals
-            return lhs(context, stack) != rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.EqEqEq) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) === rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.BangEqEq) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) !== rhs(context, stack);
-        });
-    }
-
-    // unlike in JS `in` operator works on arrays: 2 in [1, 2, 3] === true
-    if (expr.operator === TokenType.In) {
-
-        const contains = options.NoProtoAccess ? hasOwnProp : makeProtoPropQuery(options);
-
-        return maybeConst(lhs, rhs, (context, stack) => {
-
-            const item = lhs(context, stack);
-            const value = rhs(context, stack);
-
-            if (Array.isArray(value)) {
-                return value.indexOf(item) !== -1;
+        return mark({ isConst, isAsync: true }, (context, stack) => {
+            if (isLHSAsync) {
+                return lhs(context, stack).then((a: any) => {
+                    if (expr.operator === TokenType.PipePipe) {
+                        return a || rhs(context, stack);
+                    }
+                    return a && rhs(context, stack);
+                });
             }
-
-            return contains(value, item);
+            const a = lhs(context, stack);
+            if (expr.operator === TokenType.PipePipe) {
+                return a ? Promise.resolve(a) : rhs(context, stack);
+            }
+            return a ? rhs(context, stack) : Promise.resolve(a);
         });
     }
 
-    if (expr.operator === TokenType.Lt) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) < rhs(context, stack);
+    const contains = options.NoProtoAccess ? hasOwnProp : makeProtoPropQuery(options);
+
+    function evaluate(operator: TokenType.Any, a: any, b: any): any {
+        switch (operator) {
+            case TokenType.Pipe: return a | b;
+            case TokenType.Caret: return a ^ b;
+            case TokenType.Amp: return a & b;
+            case TokenType.EqEq: return a == b; // tslint:disable-line:triple-equals
+            case TokenType.BangEq: return a != b; // tslint:disable-line:triple-equals
+            case TokenType.EqEqEq: return a === b;
+            case TokenType.BangEqEq: return a !== b;
+            case TokenType.Lt: return a < b;
+            case TokenType.LtEq: return a <= b;
+            case TokenType.Gt: return a > b;
+            case TokenType.GtEq: return a >= b;
+            case TokenType.LtLt: return a << b;
+            case TokenType.GtGt: return a >> b;
+            case TokenType.GtGtGt: return a >>> b;
+            case TokenType.Plus: return a + b;
+            case TokenType.Minus: return a - b;
+            case TokenType.Star: return a * b;
+            case TokenType.Slash: return a / b;
+            case TokenType.Percent: return a % b;
+            case TokenType.StarStar: return a ** b;
+            case TokenType.In:
+                // unlike in JS `in` operator not only works on objects but also on:
+                //      arrays: 20 in [1, 20, 3] === true
+                //      strings: 'sum' in 'lorem ipsum' === true
+                if (Array.isArray(b) || typeof b === 'string') {
+                    return (b as any).indexOf(a) !== -1;
+                }
+                return contains(b, a);
+            default:
+                throw new TypeError(UnknownExpression(expr));
+        }
+    }
+
+    const isAsync = hasAsyncValue(lhs) || hasAsyncValue(rhs);
+
+    return mark({ isConst, isAsync }, (context, stack) => {
+        return evalMaybeAsyncSteps(context, stack, [lhs, rhs]).then(([a, b]) => {
+            return evaluate(expr.operator, a, b);
         });
-    }
-
-    if (expr.operator === TokenType.LtEq) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) <= rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.Gt) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) > rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.GtEq) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) >= rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.LtLt) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) << rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.GtGt) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) >> rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.GtGtGt) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) >>> rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.Plus) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) + rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.Minus) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) - rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.Star) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) * rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.Slash) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) / rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.Percent) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) % rhs(context, stack);
-        });
-    }
-
-    if (expr.operator === TokenType.StarStar) {
-        return maybeConst(lhs, rhs, (context, stack) => {
-            return lhs(context, stack) ** rhs(context, stack);
-        });
-    }
-
-    throw new TypeError(UnknownExpression(expr));
-}
-
-function maybeConst(lhs: InternalEvaluator, rhs: InternalEvaluator, evaluator: InternalEvaluator): InternalEvaluator {
-
-    if (hasConstValue(lhs as Evaluator) && hasConstValue(rhs as Evaluator)) {
-        return markAsConst(evaluator);
-    }
-
-    return evaluator;
-}
+    });
+};

@@ -1,10 +1,9 @@
-import { InternalEvaluator, EvaluatorContext, makeConstEval, markAsConst } from './';
-import { CompilerOptions, EvaluatorFactory } from '../';
-import { Expression, ExpressionType } from '../../Parser';
+import { makeConstEval, EvaluatorFactory, mark, InternalEvaluator } from './';
+import { ExpressionType } from '../../Parser';
 import { UnknownExpression, UndefinedIdentifier, CannotAccessProto } from '../Error';
 import { hasOwnProp, ownPropGetter, bindFunction, makeProtoPropQuery, makeProtoPropGetter } from './util';
 
-export function Identifier(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
+export const Identifier: EvaluatorFactory = (expr, options, compile) => {
 
     if (expr.type !== ExpressionType.Identifier) {
         throw new TypeError(UnknownExpression(expr));
@@ -13,7 +12,7 @@ export function Identifier(expr: Expression.Any, options: CompilerOptions, compi
     const { name } = expr;
 
     if (name === '__proto__') {
-        return markAsConst(() => { throw new TypeError(CannotAccessProto); });
+        return mark({ isConst: true }, () => { throw new TypeError(CannotAccessProto); });
     }
 
     const contains = options.NoProtoAccess ? hasOwnProp : makeProtoPropQuery(options);
@@ -28,7 +27,7 @@ export function Identifier(expr: Expression.Any, options: CompilerOptions, compi
 
     const get = options.NoProtoAccess ? ownPropGetter : makeProtoPropGetter(options);
 
-    const evaluator = (context: EvaluatorContext) => {
+    const evaluator: InternalEvaluator = (context) => {
 
         const value = get(context, name);
 
@@ -40,15 +39,15 @@ export function Identifier(expr: Expression.Any, options: CompilerOptions, compi
     };
 
     if (options.NoUndefinedVars) {
-        return (context: EvaluatorContext) => {
+        return (context, stack) => {
 
             if (!contains(context, name)) {
                 throw new ReferenceError(UndefinedIdentifier(name));
             }
 
-            return evaluator(context);
+            return evaluator(context, stack);
         };
     }
 
     return evaluator;
-}
+};

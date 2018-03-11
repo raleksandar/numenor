@@ -12,6 +12,7 @@ import { PrefixOperation } from './Compiler/Evaluator/PrefixOperation';
 import { Sequence } from './Compiler/Evaluator/Sequence';
 import { Value } from './Compiler/Evaluator/Value';
 import { StackPush, StackPop, StackRef } from './Compiler/Evaluator/Stack';
+import { Await } from './Compiler/Evaluator/Await';
 
 export class ExpressionCompiler extends Compiler {
 
@@ -27,6 +28,7 @@ export class ExpressionCompiler extends Compiler {
         this.setCompiler(ExpressionType.StackPush, StackPush);
         this.setCompiler(ExpressionType.StackPop, StackPop);
         this.setCompiler(ExpressionType.StackRef, StackRef);
+        this.setCompiler(ExpressionType.Await, Await);
         this.setCompiler(ExpressionType.MemberAccess, MemberAccess);
         this.setCompiler(ExpressionType.ComputedMemberAccess, ComputedMemberAccess);
         this.setCompiler(ExpressionType.ObjectLiteral, ObjectLiteral);

@@ -1,26 +1,9 @@
 import { Expression, ExpressionType } from '../Parser';
-import { Evaluator, InternalEvaluator, EvaluatorContext, EmptyContext } from './Evaluator';
+import { Evaluator, EvaluatorContext, CompilerOptions, EvaluatorFactory } from './Evaluator';
 import * as Error from './Error';
 import { ArrayPrototype } from './ArrayPrototype';
 import { makeValueMarshaller } from './Evaluator/util';
 import { EventEmitter } from '../common/EventEmitter';
-
-export interface CompilerOptions {
-    NoUndefinedVars?: boolean;      // throws if referencing variable not defined in the context
-    NoNewVars?: boolean;            // throws if assigning a value to the variable not defined in context
-    ImmutableContext?: boolean;     // throws if trying to use any assignment operation
-    NoProtoAccess?: boolean;        // disallows accessing or traversing of prototype chain
-    ObjectPrototype?: any;          // prototype to use for objects created via object literals
-    ArrayPrototype?: any;           // prototype to use for array values
-    EnforceMarshalling?: boolean;   // enforce given prototypes on object returned from evaluator
-    Constants?: {                   // compile-time constants to use
-        [name: string]: any;        // if a constant has function type it is eligible for CTFE
-    };
-}
-
-export interface EvaluatorFactory {
-    (expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator;
-}
 
 const DefaultOptions: CompilerOptions = {
     NoUndefinedVars: false,

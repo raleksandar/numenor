@@ -1,49 +1,46 @@
-import { InternalEvaluator, EvaluatorContext, Stack, hasConstValue, Evaluator, markAsConst } from './';
-import { CompilerOptions, EvaluatorFactory } from '../';
-import { Expression, ExpressionType } from '../../Parser';
+import { hasConstValue, mark, EvaluatorFactory, hasAsyncValue } from './';
+import { ExpressionType } from '../../Parser';
 import { UnknownExpression, CannotAccessProperty, CannotAccessProto } from '../Error';
-import { ownPropGetter, bindFunction, makeProtoPropGetter } from './util';
+import { ownPropGetter, bindFunction, makeProtoPropGetter, evalMaybeAsyncSteps } from './util';
 
-export function MemberAccess(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
+export const MemberAccess: EvaluatorFactory = (expr, options, compile) => {
 
     if (expr.type !== ExpressionType.MemberAccess) {
         throw new TypeError(UnknownExpression(expr));
     }
 
-    const lhs = compile(expr.lhs, options, compile);
     const { name } = expr;
 
     if (name === '__proto__') {
-        return markAsConst(() => { throw new TypeError(CannotAccessProto); });
+        return mark({ isConst: true }, () => { throw new TypeError(CannotAccessProto); });
     }
+
+    const lhs = compile(expr.lhs, options, compile);
+
+    const isAsync = hasAsyncValue(lhs);
+    const isConst = hasConstValue(lhs);
 
     const get = options.NoProtoAccess ? ownPropGetter : makeProtoPropGetter(options);
 
-    const evaluator = (context: EvaluatorContext, stack: Stack) => {
+    return mark({ isAsync, isConst }, (context, stack) => {
+        return evalMaybeAsyncSteps(context, stack, [lhs]).then(([object]) => {
 
-        const object = lhs(context, stack);
+            if (object == null) {
+                throw new TypeError(CannotAccessProperty(object, name));
+            }
 
-        if (object == null) {
-            throw new TypeError(CannotAccessProperty(object, name));
-        }
+            const value = get(object, name);
 
-        const value = get(object, name);
+            if (typeof value === 'function') {
+                return bindFunction(value, object);
+            }
 
-        if (typeof value === 'function') {
-            return bindFunction(value, object);
-        }
+            return value;
+        });
+    });
+};
 
-        return value;
-    };
-
-    if (hasConstValue(lhs as Evaluator)) {
-        return markAsConst(evaluator);
-    }
-
-    return evaluator;
-}
-
-export function ComputedMemberAccess(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
+export const ComputedMemberAccess: EvaluatorFactory = (expr, options, compile) => {
 
     if (expr.type !== ExpressionType.ComputedMemberAccess) {
         throw new TypeError(UnknownExpression(expr));
@@ -52,34 +49,37 @@ export function ComputedMemberAccess(expr: Expression.Any, options: CompilerOpti
     const lhs = compile(expr.lhs, options, compile);
     const rhs = compile(expr.rhs, options, compile);
 
+    const isAsync = hasAsyncValue(lhs) || hasAsyncValue(rhs);
+    const isConst = hasConstValue(lhs) && hasConstValue(rhs);
+
     const get = options.NoProtoAccess ? ownPropGetter : makeProtoPropGetter(options);
 
-    const evaluator = (context: EvaluatorContext, stack: Stack) => {
+    return mark({ isConst, isAsync }, (context, stack) => {
+        return evalMaybeAsyncSteps(context, stack, [
 
-        const object = lhs(context, stack);
+            [lhs, (object) => {
+                if (object == null) {
+                    throw new TypeError(CannotAccessProperty(object));
+                }
+                return object;
+            }],
 
-        if (object == null) {
-            throw new TypeError(CannotAccessProperty(object));
-        }
+            [rhs, (name) => {
+                if (name === '__proto__') {
+                    throw new TypeError(CannotAccessProto);
+                }
+                return name;
+            }],
 
-        const name = rhs(context, stack);
+        ]).then(([object, name]) => {
 
-        if (name === '__proto__') {
-            throw new TypeError(CannotAccessProto);
-        }
+            const value = get(object, name);
 
-        const value = get(object, name);
+            if (typeof value === 'function') {
+                return bindFunction(value, object);
+            }
 
-        if (typeof value === 'function') {
-            return bindFunction(value, object);
-        }
-
-        return value;
-    };
-
-    if (hasConstValue(lhs as Evaluator) && hasConstValue(rhs as Evaluator)) {
-        return markAsConst(evaluator);
-    }
-
-    return evaluator;
-}
+            return value;
+        });
+    });
+};

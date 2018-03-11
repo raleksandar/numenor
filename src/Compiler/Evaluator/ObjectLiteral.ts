@@ -1,72 +1,49 @@
-import {
-    InternalEvaluator,
-    Evaluator,
-    hasConstValue,
-    makeConstEval,
-    evalConst,
-    EvaluatorContext,
-    Stack
-} from './';
-import { CompilerOptions, EvaluatorFactory } from '../';
-import { Expression, ExpressionType } from '../../Parser';
+import { hasConstValue, EvaluatorFactory, hasAsyncValue, mark } from './';
+import { ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
+import { EvalStep, evalMaybeAsyncSteps } from './util';
 
-export function ObjectLiteral(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
+export const ObjectLiteral: EvaluatorFactory = (expr, options, compile) => {
 
     if (expr.type !== ExpressionType.ObjectLiteral) {
         throw new TypeError(UnknownExpression(expr));
     }
 
     let isConst = true;
+    let isAsync = false;
 
-    const items = expr.items.map(({ name, value }) => {
+    const { length } = expr.items;
+    const steps: EvalStep[] = new Array(length * 2);
+
+    expr.items.forEach(({ name, value }, index) => {
 
         const nameEval = compile(name, options, compile);
         const valueEval = compile(value, options, compile);
 
-        const isNameConst = hasConstValue(nameEval as Evaluator);
-
-        if (isConst && !isNameConst || !hasConstValue(valueEval as Evaluator)) {
+        if (isConst && !(hasConstValue(nameEval) && hasConstValue(valueEval))) {
             isConst = false;
         }
 
-        return {
-            name: isNameConst ? evalConst(nameEval) : nameEval,
-            value: valueEval,
-        };
+        if (!isAsync && (hasAsyncValue(nameEval) || hasAsyncValue(valueEval))) {
+            isAsync = true;
+        }
+
+        steps[index * 2] = nameEval;
+        steps[index * 2 + 1] = valueEval;
     });
 
     const { ObjectPrototype } = options;
 
-    if (isConst) {
+    return mark({ isAsync, isConst }, (context, stack) => {
+        return evalMaybeAsyncSteps(context, stack, steps).then((pairs) => {
 
-        const object = Object.create(ObjectPrototype);
+            const object = Object.create(ObjectPrototype);
 
-        items.forEach(({ name, value }) => {
-            object[name] = evalConst(value);
-        });
-
-        return makeConstEval(object);
-    }
-
-    const length = items.length;
-
-    return (context: EvaluatorContext, stack: Stack) => {
-
-        const object = Object.create(ObjectPrototype);
-
-        for (let i = 0; i < length; i++) {
-
-            const { name, value } = items[i];
-            let itemName = name;
-
-            if (typeof name === 'function') {
-                itemName = name(context, stack);
+            for (let i = 0; i < length; i++) {
+                object[pairs[i * 2]] = pairs[i * 2 + 1];
             }
 
-            object[itemName] = value(context, stack);
-        }
-
-        return object;
-    };
-}
+            return object;
+        });
+    });
+};

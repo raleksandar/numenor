@@ -1,53 +1,46 @@
-import { InternalEvaluator, Stack, EvaluatorContext, hasConstValue, Evaluator, markAsConst } from './';
-import { CompilerOptions, EvaluatorFactory } from '../';
-import { Expression, ExpressionType } from '../../Parser';
+import { hasConstValue, hasAsyncValue, EvaluatorFactory, mark } from './';
+import { ExpressionType } from '../../Parser';
 import { UnknownExpression, CantInvoke } from '../Error';
-import { makeValueMarshaller } from './util';
+import { makeValueMarshaller, EvalStep, evalMaybeAsyncSteps } from './util';
 
-export function Call(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
+export const Call: EvaluatorFactory = (expr, options, compile) => {
 
     if (expr.type !== ExpressionType.Call) {
         throw new TypeError(UnknownExpression(expr));
     }
 
-    const lhs = compile(expr.lhs, options, compile);
-
-    let isConst = hasConstValue(lhs as Evaluator);
-
-    const args = expr.args.map((argExpr) => {
-
-        const arg = compile(argExpr, options, compile);
-
-        if (isConst && !hasConstValue(arg as Evaluator)) {
-            isConst = false;
-        }
-
-        return arg;
-    });
-
-    const { length } = args;
     const marshallValue = makeValueMarshaller(options);
 
-    const evaluator = (context: EvaluatorContext, stack: Stack) => {
+    const lhs = compile(expr.lhs, options, compile);
 
-        const callee = lhs(context, stack);
-
+    const steps: EvalStep[] = [[lhs, (callee) => {
         if (typeof callee !== 'function') {
             throw new TypeError(CantInvoke);
         }
+        return callee;
+    }]];
 
-        const params: any[] = new Array(length);
+    let isConst = hasConstValue(lhs);
+    let isAsync = hasAsyncValue(lhs);
 
-        for (let i = 0; i < length; i++) {
-            params[i] = marshallValue(args[i](context, stack));
+    expr.args.forEach((argExpr) => {
+
+        const arg = compile(argExpr, options, compile);
+
+        if (isConst && !hasConstValue(arg)) {
+            isConst = false;
         }
 
-        return callee(...params);
-    };
+        if (!isAsync && hasAsyncValue(arg)) {
+            isAsync = true;
+        }
 
-    if (isConst) {
-        return markAsConst(evaluator);
-    }
+        steps.push([arg, marshallValue]);
+    });
 
-    return evaluator;
-}
+    return mark({ isAsync, isConst }, (context, stack) => {
+        return evalMaybeAsyncSteps(context, stack, steps).then(([callee, ...params]) => {
+            return callee(...params);
+        });
+    });
+};

@@ -1,28 +1,44 @@
-import { InternalEvaluator, EvaluatorContext, Stack, hasConstValue, Evaluator, makeConstEval, evalConst, markAsConst } from './';
-import { CompilerOptions, EvaluatorFactory } from '../';
-import { Expression, ExpressionType } from '../../Parser';
+import { ExpressionType } from '../../Parser';
+import {
+    InternalEvaluator,
+    EvaluatorContext,
+    Stack,
+    hasAsyncValue,
+    hasConstValue,
+    makeConstEval,
+    evalConst,
+    mark,
+    EvaluatorFactory,
+} from './';
 import {
     UnknownExpression,
     UndefinedIdentifier,
     ImmutableContext,
-    CannotAccessProperty
+    CannotAccessProperty,
+    CannotAccessProto
 } from '../Error';
-import { hasOwnProp, makeProtoPropQuery } from './util';
+import {
+    hasOwnProp,
+    makeProtoPropQuery,
+    evalMaybeAsyncSteps,
+    identity
+} from './util';
 
-export function Assignment(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
+export const Assignment: EvaluatorFactory = (expr, options, compile) => {
 
     if (expr.type !== ExpressionType.Assignment) {
         throw new TypeError(UnknownExpression(expr));
     }
 
     if (options.ImmutableContext) {
-        return markAsConst(() => { throw new TypeError(ImmutableContext); });
+        return mark({ isConst: true }, () => { throw new TypeError(ImmutableContext); });
     }
 
     const rhs = compile(expr.rhs, options, compile);
 
     const contains = options.NoProtoAccess ? hasOwnProp : makeProtoPropQuery(options);
-    const isConst = options.Constants && hasConstValue(rhs as Evaluator);
+    let isConst = options.Constants && hasConstValue(rhs);
+    let isAsync = hasAsyncValue(rhs);
 
     if (expr.lhs.type === ExpressionType.Identifier) {
 
@@ -38,7 +54,18 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
         }
 
         if (isConst && contains(options.Constants!, name)) {
+            if (isAsync) {
+                return mark({ isConst, isAsync }, () => {
+                    return evalConst(rhs).then((value: any) => options.Constants![name] = value);
+                });
+            }
             return makeConstEval(options.Constants![name] = evalConst(rhs));
+        }
+
+        if (isAsync) {
+            return mark({ isAsync }, (context, stack) => {
+                return rhs(context, stack).then((value: any) => context[name] = value);
+            });
         }
 
         return (context: EvaluatorContext, stack: Stack) => {
@@ -46,51 +73,54 @@ export function Assignment(expr: Expression.Any, options: CompilerOptions, compi
         };
     }
 
+    let prop: InternalEvaluator;
+    let propProcessor = identity;
+
     if (expr.lhs.type === ExpressionType.MemberAccess) {
 
         const { name } = expr.lhs;
-        const lhs = compile(expr.lhs.lhs, options, compile);
 
-        const evaluator = (context: EvaluatorContext, stack: Stack) => {
-
-            const object = lhs(context, stack);
-
-            if (object === null || typeof object !== 'object') {
-                throw new TypeError(CannotAccessProperty(object, name));
-            }
-
-            return object[name] = rhs(context, stack);
-        };
-
-        if (isConst && hasConstValue(lhs as Evaluator)) {
-            return markAsConst(evaluator);
+        if (name === '__proto__') {
+            return mark({ isConst: true }, () => { throw new TypeError(CannotAccessProto); });
         }
 
-        return evaluator;
-    }
+        prop = () => name;
+        propProcessor = identity;
 
-    if (expr.lhs.type === ExpressionType.ComputedMemberAccess) {
+    } else if (expr.lhs.type === ExpressionType.ComputedMemberAccess) {
 
-        const lhs = compile(expr.lhs.lhs, options, compile);
-        const prop = compile(expr.lhs.rhs, options, compile);
-
-        const evaluator = (context: EvaluatorContext, stack: Stack) => {
-
-            const object = lhs(context, stack);
-
-            if (object === null || typeof object !== 'object') {
-                throw new TypeError(CannotAccessProperty(object));
+        prop = compile(expr.lhs.rhs, options, compile);
+        propProcessor = (propName) => {
+            if (propName === '__proto__') {
+                throw new TypeError(CannotAccessProto);
             }
-
-            return object[prop(context, stack)] = rhs(context, stack);
+            return propName;
         };
 
-        if (isConst && hasConstValue(lhs as Evaluator) && hasConstValue(prop as Evaluator)) {
-            return markAsConst(evaluator);
-        }
+        isConst = isConst && hasConstValue(prop);
+        isAsync = isAsync || hasAsyncValue(prop);
 
-        return evaluator;
+    } else {
+        throw new TypeError(UnknownExpression(expr.lhs));
     }
 
-    throw new TypeError(UnknownExpression(expr.lhs));
-}
+    const lhs = compile(expr.lhs.lhs, options, compile);
+
+    isConst = isConst && hasConstValue(lhs);
+    isAsync = isAsync || hasAsyncValue(lhs);
+
+    return mark({ isConst, isAsync }, (context, stack) => {
+        return evalMaybeAsyncSteps(context, stack, [
+            [lhs, (object) => {
+                if (object === null || typeof object !== 'object') {
+                    throw new TypeError(CannotAccessProperty(object, name));
+                }
+                return object;
+            }],
+            [prop, propProcessor],
+            rhs,
+        ]).then(([object, propName, value]) => {
+            return object[propName] = value;
+        });
+    });
+};

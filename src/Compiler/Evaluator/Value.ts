@@ -1,9 +1,8 @@
-import { InternalEvaluator, makeConstEval } from './';
-import { CompilerOptions, EvaluatorFactory } from '../';
-import { Expression, ExpressionType } from '../../Parser';
+import { makeConstEval, EvaluatorFactory } from './';
+import { ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
 
-export function Value(expr: Expression.Any, options: CompilerOptions, compile: EvaluatorFactory): InternalEvaluator {
+export const Value: EvaluatorFactory = (expr, options, compile) => {
 
     if (expr.type !== ExpressionType.NumberLiteral &&
         expr.type !== ExpressionType.StringLiteral &&
@@ -15,4 +14,4 @@ export function Value(expr: Expression.Any, options: CompilerOptions, compile: E
     }
 
     return makeConstEval(expr.value);
-}
+};

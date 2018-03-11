@@ -1,9 +1,9 @@
 import { Parser } from './Parser';
-import { Compiler, CompilerOptions } from './Compiler';
+import { Compiler } from './Compiler';
 import { ExpressionParser } from './ExpressionParser';
 import { ExpressionCompiler } from './ExpressionCompiler';
 import { ExpressionLexer } from './ExpressionLexer';
-import { EvaluatorContext, Evaluator } from './Compiler/Evaluator';
+import { EvaluatorContext, Evaluator, CompilerOptions } from './Compiler/Evaluator';
 
 export class ExpressionEvaluator {
 

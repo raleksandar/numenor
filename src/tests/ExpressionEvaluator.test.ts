@@ -1,6 +1,5 @@
 import { ExpressionEvaluator } from '../';
-import { EvaluatorContext } from '../Compiler/Evaluator';
-import { CompilerOptions } from '../Compiler';
+import { EvaluatorContext, CompilerOptions } from '../Compiler/Evaluator';
 
 describe('ExpressionEvaluator', () => {
 
@@ -11,6 +10,9 @@ describe('ExpressionEvaluator', () => {
     const $compile = (expr: string, options?: CompilerOptions) => {
         return evaluator.compile(expr, options);
     };
+    const delay = (msec: number) => new Promise((resolve) => {
+        setTimeout(resolve, msec);
+    });
 
     it('Evaluates number expression', () => {
         expect($eval('3.14')).toBe(3.14);
@@ -292,5 +294,68 @@ describe('ExpressionEvaluator', () => {
 
         expect(expr(ctx)).toBe('foo|bar');
         expect(ctx.keys).toEqual(['foo', 'bar']);
+    });
+
+    it('Supports async expressions with await operator', async () => {
+
+        const ctx = {
+            asyncValue: (x: any) => delay(10).then(() => x),
+        };
+
+        const five = $eval('await asyncValue(5)', ctx);
+
+        expect(five).toBeInstanceOf(Promise);
+
+        await expect(five).resolves.toBe(5);
+
+        const sum = $eval('await asyncValue(3) + 5 + await asyncValue(2)', ctx);
+
+        expect(sum).toBeInstanceOf(Promise);
+
+        await expect(sum).resolves.toBe(10);
+    });
+
+    it('Supports awaiting an array (Promise.all)', async () => {
+
+        const resolveOrder: string[] = [];
+
+        const ctx = {
+            a: delay(10).then(() => resolveOrder.push('a') && 'a'),
+            b: () => resolveOrder.push('b') && 'b',
+            c: delay(40).then(() => resolveOrder.push('c') && 'c'),
+            d: delay(20).then(() => resolveOrder.push('d') && 'd'),
+        };
+
+        const promise = $eval('await [a, b(), c, d]', ctx);
+
+        expect(resolveOrder.length).toBe(1); // b() is already resolved here
+
+        expect(promise).toBeInstanceOf(Promise);
+
+        await expect(promise).resolves.toEqual(['a', 'b', 'c', 'd']);
+
+        expect(resolveOrder).toEqual(['b', 'a', 'd', 'c']);
+    });
+
+    it('Await respects expression order evaluation', async () => {
+
+        const resolveOrder: string[] = [];
+
+        const ctx = {
+            a: () => delay(10).then(() => resolveOrder.push('a') && 'a'),
+            b: () => resolveOrder.push('b') && 'b',
+            c: () => delay(40).then(() => resolveOrder.push('c') && 'c'),
+            d: () => delay(20).then(() => resolveOrder.push('d') && 'd'),
+        };
+
+        const promise = $eval('[await a(), b(), await c(), await d()]', ctx);
+
+        expect(resolveOrder.length).toBe(0);
+
+        expect(promise).toBeInstanceOf(Promise);
+
+        await expect(promise).resolves.toEqual(['a', 'b', 'c', 'd']);
+
+        expect(resolveOrder).toEqual(['a', 'b', 'c', 'd']);
     });
 });
