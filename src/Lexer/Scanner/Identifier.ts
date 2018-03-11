@@ -24,6 +24,14 @@ export const Identifier: Scanner = (start, position, context) => {
         };
     }
 
+    if (name === 'await') {
+        return {
+            type: TokenType.Await,
+            lexeme: name,
+            ...position,
+        };
+    }
+
     if (name === 'true' || name === 'false') {
         return {
             type: TokenType.BooleanLiteral,

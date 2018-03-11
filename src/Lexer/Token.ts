@@ -110,6 +110,10 @@ export interface In extends Token {
     readonly type: typeof TokenType.In;
 }
 
+export interface Await extends Token {
+    readonly type: typeof TokenType.Await;
+}
+
 export interface Plus extends Token {
     readonly type: typeof TokenType.Plus;
 }
@@ -307,6 +311,7 @@ export type Any = Unknown
     | Dot
     | Colon
     | In
+    | Await
     | Plus
     | PlusPlus
     | PlusEq

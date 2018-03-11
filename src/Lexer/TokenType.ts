@@ -63,6 +63,7 @@ export const QuestionQuestion = Symbol('??');
 export const QuestionQuestionEq = Symbol('??=');
 export const Colon = Symbol(':');
 export const In = Symbol('in');
+export const Await = Symbol('await');
 
 export type Literal = typeof NumberLiteral
     | typeof StringLiteral
@@ -75,7 +76,8 @@ export type UnaryOperator = typeof Plus
     | typeof Minus
     | typeof MinusMinus
     | typeof Bang
-    | typeof Tilde;
+    | typeof Tilde
+    | typeof Await;
 
 export type AssignmentOperator = typeof Eq
     | typeof PlusEq
