@@ -5,8 +5,8 @@ import { TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 import { Any as Precedence } from '../Precedence';
 
-export const LeftAssociative = Symbol('LeftAssociative');
-export const RightAssociative = Symbol('RightAssociative');
+export const LeftAssociative = Symbol.for('numenor:assoc:left');
+export const RightAssociative = Symbol.for('numenor:assoc:right');
 
 export type Associativity = typeof LeftAssociative | typeof RightAssociative;
 

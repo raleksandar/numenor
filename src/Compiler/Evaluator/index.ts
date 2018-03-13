@@ -13,9 +13,9 @@ export interface CompilerOptions {
     };
 }
 
-export const ConstValue = Symbol('const');
-export const AsyncValue = Symbol('async');
-export const ValueLookup = Symbol('lookup');
+export const ConstValue = Symbol.for('numenor:eval:const');
+export const AsyncValue = Symbol.for('numenor:eval:async');
+export const ValueLookup = Symbol.for('numenor:context:lookup');
 
 export interface EvaluatorContext {
     [name: string]: any;
