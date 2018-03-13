@@ -9,7 +9,7 @@ import {
 const ownProp = Object.prototype.hasOwnProperty;
 const bind = Function.prototype.bind;
 
-export type PropQuery = (obj: {}, prop: string) => boolean;
+export type PropQuery = (obj: {}, prop: string | symbol) => boolean;
 export type Getter = (obj: {[name: string]: any}, prop: string) => any;
 
 export function makeProtoPropQuery(options: CompilerOptions): PropQuery {

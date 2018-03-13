@@ -15,6 +15,7 @@ export interface CompilerOptions {
 
 export const ConstValue = Symbol('const');
 export const AsyncValue = Symbol('async');
+export const ValueLookup = Symbol('lookup');
 
 export interface EvaluatorContext {
     [name: string]: any;

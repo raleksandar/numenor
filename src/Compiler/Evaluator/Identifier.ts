@@ -1,4 +1,4 @@
-import { makeConstEval, EvaluatorFactory, mark, InternalEvaluator } from './';
+import { makeConstEval, EvaluatorFactory, mark, ValueLookup } from './';
 import { ExpressionType } from '../../Parser';
 import { UnknownExpression, UndefinedIdentifier, CannotAccessProto } from '../Error';
 import { hasOwnProp, ownPropGetter, bindFunction, makeProtoPropQuery, makeProtoPropGetter } from './util';
@@ -17,19 +17,37 @@ export const Identifier: EvaluatorFactory = (expr, options, compile) => {
 
     const contains = options.NoProtoAccess ? hasOwnProp : makeProtoPropQuery(options);
 
-    if (options.Constants && contains(options.Constants, name)) {
-        const value = options.Constants[name];
-        if (typeof value === 'function') {
-            return makeConstEval(bindFunction(value, options.Constants));
+    if (options.Constants) {
+
+        let constValue: any = undefined;
+
+        if (contains(options.Constants, name)) {
+            constValue = options.Constants[name];
+        } else if (contains(options.Constants, ValueLookup)) {
+            constValue = options.Constants[ValueLookup](name);
         }
-        return makeConstEval(value);
+
+        if (constValue !== undefined) {
+            if (typeof constValue === 'function') {
+                return makeConstEval(bindFunction(constValue, options.Constants));
+            }
+            return makeConstEval(constValue);
+        }
     }
 
     const get = options.NoProtoAccess ? ownPropGetter : makeProtoPropGetter(options);
 
-    const evaluator: InternalEvaluator = (context) => {
+    return (context) => {
 
-        const value = get(context, name);
+        let value = get(context, name);
+
+        if (value === undefined && contains(context, ValueLookup)) {
+            value = context[ValueLookup](name);
+        }
+
+        if (options.NoUndefinedVars && value === undefined) {
+            throw new ReferenceError(UndefinedIdentifier(name));
+        }
 
         if (typeof value === 'function') {
             return bindFunction(value, context);
@@ -37,17 +55,4 @@ export const Identifier: EvaluatorFactory = (expr, options, compile) => {
 
         return value;
     };
-
-    if (options.NoUndefinedVars) {
-        return (context, stack) => {
-
-            if (!contains(context, name)) {
-                throw new ReferenceError(UndefinedIdentifier(name));
-            }
-
-            return evaluator(context, stack);
-        };
-    }
-
-    return evaluator;
 };

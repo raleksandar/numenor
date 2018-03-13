@@ -1,5 +1,5 @@
 import { ExpressionEvaluator } from '../';
-import { EvaluatorContext, CompilerOptions } from '../Compiler/Evaluator';
+import { EvaluatorContext, CompilerOptions, ValueLookup } from '../Compiler/Evaluator';
 
 describe('ExpressionEvaluator', () => {
 
@@ -357,5 +357,23 @@ describe('ExpressionEvaluator', () => {
         await expect(promise).resolves.toEqual(['a', 'b', 'c', 'd']);
 
         expect(resolveOrder).toEqual(['a', 'b', 'c', 'd']);
+    });
+
+    it('Supports ValueLookup on evaluation context', () => {
+
+        const ctx = {
+            [ValueLookup]: (name: string) => {
+                if (name === 'foo') {
+                    return 123;
+                } else if (name.match(/(\d+)/)) {
+                    return RegExp.$1;
+                }
+                return undefined;
+            }
+        };
+
+        expect($eval('foo', ctx)).toBe(123);
+        expect($eval('bar', ctx)).toBeUndefined();
+        expect($eval('n456z', ctx)).toBe('456');
     });
 });
