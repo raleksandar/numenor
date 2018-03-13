@@ -69,8 +69,12 @@ export function makeValueMarshaller(options: CompilerOptions): ValueProcessor {
     };
 }
 
-export function bindFunction(fn: () => any, thisArg: any): () => any {
-    return bind.call(fn, thisArg);
+export function bindFunction(fn: { (): any, [index: string]: any}, thisArg: any): () => any {
+    const boundFunction = bind.call(fn, thisArg);
+    for (const key of Object.keys(fn)) {
+        boundFunction[key] = fn[key];
+    }
+    return boundFunction;
 }
 
 export type ValueProcessor = (value: any) => any;

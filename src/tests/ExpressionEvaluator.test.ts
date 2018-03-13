@@ -376,4 +376,29 @@ describe('ExpressionEvaluator', () => {
         expect($eval('bar', ctx)).toBeUndefined();
         expect($eval('n456z', ctx)).toBe('456');
     });
+
+    it('Copies enumerable properties when binding functions', () => {
+
+        type TaggedFunction = {
+            (): any;
+            [tag: string]: any;
+        };
+
+        const ctx = {
+            x: 123,
+            fn() {
+                return this.x;
+            },
+        };
+
+        (ctx.fn as TaggedFunction).tag = 'foo';
+
+        const fn = $eval('x = 5, fn', ctx) as TaggedFunction;
+
+        expect(ctx.x).toBe(5);
+        expect(fn).toBeInstanceOf(Function);
+        expect(fn === ctx.fn).toBe(false);
+        expect(fn.tag).toBe('foo');
+        expect(fn()).toBe(5);
+    });
 });
