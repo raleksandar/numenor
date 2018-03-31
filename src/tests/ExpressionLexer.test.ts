@@ -145,4 +145,16 @@ describe('Lexer', () => {
         }
         expect(tokens[2].type).toBe(TokenType.EOF);
     });
+
+    it('Parses string escape sequence', () => {
+        const tokens = tokenize('"first line\\nsecond line\\n\\r"');
+        expect(tokens.length).toBe(2);
+        expect(tokens[0].type).toBe(TokenType.StringLiteral);
+        const stringToken = tokens[0];
+        if (stringToken.type === TokenType.StringLiteral) {
+            expect(stringToken.lexeme).toBe('"first line\\nsecond line\\n\\r"');
+            expect(stringToken.value).toBe('first line\nsecond line\n\r');
+        }
+        expect(tokens[1].type).toBe(TokenType.EOF);
+    });
 });

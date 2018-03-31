@@ -51,7 +51,6 @@ function handleEscapeSequence(context: ScannerContext): string {
     const ch = context.current();
 
     if (escapes.has(ch)) {
-        context.advance();
         return escapes.get(ch)!;
     }
 
