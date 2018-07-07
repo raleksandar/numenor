@@ -290,6 +290,10 @@ export interface QuestionQuestionEq extends Assignment {
     readonly type: typeof TokenType.QuestionQuestionEq;
 }
 
+export interface RightArrow extends Token {
+    readonly type: typeof TokenType.RightArrow;
+}
+
 export type Any = Unknown
     | Invalid
     | EOF
@@ -355,4 +359,5 @@ export type Any = Unknown
     | Question
     | QuestionDot
     | QuestionQuestion
-    | QuestionQuestionEq;
+    | QuestionQuestionEq
+    | RightArrow;

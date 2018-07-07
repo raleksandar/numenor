@@ -64,6 +64,7 @@ export const QuestionQuestionEq = Symbol.for('numenor:tok:??=');
 export const Colon = Symbol.for('numenor:tok::');
 export const In = Symbol.for('numenor:tok:in');
 export const Await = Symbol.for('numenor:tok:await');
+export const RightArrow = Symbol.for('numenor:tok:=>');
 
 export type Literal = typeof NumberLiteral
     | typeof StringLiteral
@@ -159,6 +160,7 @@ export type Any = typeof Unknown
     | typeof Question
     | typeof Colon
     | typeof Identifier
+    | typeof RightArrow
     | Literal
     | AssignmentOperator
     | UnaryOperator

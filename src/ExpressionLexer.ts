@@ -36,6 +36,8 @@ export class ExpressionLexer extends Lexer {
         this.appendScanner(makeOperatorScanner('-=', TokenType.MinusEq, TokenType.Minus));
         this.appendScanner(makePunctuationScanner('-', TokenType.Minus));
 
+        this.appendScanner(makePunctuationScanner('=>', TokenType.RightArrow));
+
         this.appendScanner(makePunctuationScanner('===', TokenType.EqEqEq));
         this.appendScanner(makePunctuationScanner('==', TokenType.EqEq));
         this.appendScanner(makeOperatorScanner('=', TokenType.Eq, TokenType.Eq));
