@@ -79,14 +79,14 @@ export function makePrefixAccessMutatorParselet(): Prefix {
     };
 }
 
-export function makePostfixAccessMutatorParselet<T extends TokenType.BinaryOperator>(
+export function makePostfixAccessMutatorParselet<T extends TokenType.AccessMutatorOperator>(
     operator: T,
     precedence: Precedence = PostfixPrecedence,
 ): Infix {
 
     const parselet: InfixFn = (parser, lhs, token) => {
 
-        if (!('operator' in token)) {
+        if (!('operator' in token) || token.type !== operator) {
             throw new SyntaxError(UnknownToken(token));
         }
 

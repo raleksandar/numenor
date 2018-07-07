@@ -3,6 +3,7 @@ import { Prefix } from './';
 import { TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 import { Any as Expression } from '../Expression';
+import { Identifier as IdentifierToken, Literal as LiteralToken } from '../../Lexer/Token';
 
 export const Identifier: Prefix = (parser, token) => {
     if (token.type !== TokenType.Identifier) {
@@ -10,7 +11,7 @@ export const Identifier: Prefix = (parser, token) => {
     }
     return {
         type: ExpressionType.Identifier,
-        name: token.name,
+        name: (token as IdentifierToken).name,
     };
 };
 
@@ -27,7 +28,7 @@ function parse<T extends TokenType.Literal, E extends ExpressionType.Value>(
 
         return {
             type: expression,
-            value: token.value,
+            value: (token as LiteralToken).value,
         } as Expression;
     };
 }

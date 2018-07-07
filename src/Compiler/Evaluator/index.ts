@@ -1,5 +1,7 @@
 import { Any as Expression } from '../../Parser/Expression';
 
+export const ValueLookup: unique symbol = Symbol.for('numenor:context:lookup');
+
 export interface CompilerOptions {
     NoUndefinedVars?: boolean;      // throws if referencing variable not defined in the context
     NoNewVars?: boolean;            // throws if assigning a value to the variable not defined in context
@@ -8,17 +10,15 @@ export interface CompilerOptions {
     ObjectPrototype?: any;          // prototype to use for objects created via object literals
     ArrayPrototype?: any;           // prototype to use for array values
     EnforceMarshalling?: boolean;   // enforce given prototypes on object returned from evaluator
-    Constants?: {                   // compile-time constants to use
-        [name: string]: any;        // if a constant has function type it is eligible for CTFE
-    };
+    Constants?: EvaluatorContext;   // compile-time constants to use (if a constant has function type it is eligible for CTFE)
 }
 
 export const ConstValue = Symbol.for('numenor:eval:const');
 export const AsyncValue = Symbol.for('numenor:eval:async');
-export const ValueLookup = Symbol.for('numenor:context:lookup');
 
 export interface EvaluatorContext {
     [name: string]: any;
+    [ValueLookup]?: (name: string) => any;
 }
 
 export interface Evaluator {

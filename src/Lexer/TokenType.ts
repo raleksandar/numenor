@@ -71,10 +71,12 @@ export type Literal = typeof NumberLiteral
     | typeof NullLiteral
     | typeof UndefinedLiteral;
 
-export type UnaryOperator = typeof Plus
-    | typeof PlusPlus
+export type AccessMutatorOperator = typeof PlusPlus
+    | typeof MinusMinus;
+
+export type UnaryOperator = AccessMutatorOperator
+    | typeof Plus
     | typeof Minus
-    | typeof MinusMinus
     | typeof Bang
     | typeof Tilde
     | typeof Await;

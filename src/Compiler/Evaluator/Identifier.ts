@@ -24,7 +24,7 @@ export const Identifier: EvaluatorFactory = (expr, options, compile) => {
         if (contains(options.Constants, name)) {
             constValue = options.Constants[name];
         } else if (contains(options.Constants, ValueLookup)) {
-            constValue = options.Constants[ValueLookup](name);
+            constValue = options.Constants[ValueLookup]!(name);
         }
 
         if (constValue !== undefined) {
@@ -42,7 +42,7 @@ export const Identifier: EvaluatorFactory = (expr, options, compile) => {
         let value = get(context, name);
 
         if (value === undefined && contains(context, ValueLookup)) {
-            value = context[ValueLookup](name);
+            value = context[ValueLookup]!(name);
         }
 
         if (options.NoUndefinedVars && value === undefined) {

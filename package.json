@@ -58,21 +58,21 @@
     "babel-core": "^7.0.0-bridge.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.42",
-    "@babel/core": "^7.0.0-beta.42",
-    "@babel/preset-env": "^7.0.0-beta.42",
-    "@babel/preset-stage-3": "^7.0.0-beta.42",
-    "@babel/preset-typescript": "^7.0.0-beta.42",
-    "@types/jest": "^22.2.2",
-    "babel-jest": "^22.4.3",
+    "@babel/cli": "^7.0.0-beta.52",
+    "@babel/core": "^7.0.0-beta.52",
+    "@babel/preset-env": "^7.0.0-beta.52",
+    "@babel/preset-stage-3": "^7.0.0-beta.52",
+    "@babel/preset-typescript": "^7.0.0-beta.52",
+    "@types/jest": "^23.1.4",
+    "babel-jest": "^23.2.0",
     "babel-plugin-module-resolver": "^3.1.1",
-    "jest": "^22.4.3",
+    "jest": "^23.3.0",
     "jest-spec-reporter": "^1.0.3",
     "trash-cli": "^1.4.0",
     "tsc": "^1.20150623.0",
-    "tslint": "^5.9.1",
-    "tslint-clean-code": "^0.2.6",
-    "tslint-config-standard": "^7.0.0",
-    "typescript": "^2.8.1"
+    "tslint": "^5.10.0",
+    "tslint-clean-code": "^0.2.7",
+    "tslint-config-standard": "^7.1.0",
+    "typescript": "^2.9.2"
   }
 }
