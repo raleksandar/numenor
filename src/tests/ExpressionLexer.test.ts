@@ -13,6 +13,13 @@ describe('Lexer', () => {
         return tokens;
     };
 
+    const lex = (input: string, callback: (token: Token) => void) => {
+        const tokens = tokenize(input);
+        expect(tokens.length).toBe(2);
+        expect(tokens[1].type).toBe(TokenType.EOF);
+        callback(tokens[0]);
+    };
+
     it('Returns EOF on empty string', () => {
         const tokens = tokenize('');
         expect(tokens.length).toBe(1);
@@ -156,5 +163,78 @@ describe('Lexer', () => {
             expect(stringToken.value).toBe('first line\nsecond line\n\r');
         }
         expect(tokens[1].type).toBe(TokenType.EOF);
+    });
+
+    it('Parses punctuation operators', () => {
+
+        lex('.', (token) => expect(token.type).toBe(TokenType.Dot));
+        lex('(', (token) => expect(token.type).toBe(TokenType.LParen));
+        lex(')', (token) => expect(token.type).toBe(TokenType.RParen));
+        lex('[', (token) => expect(token.type).toBe(TokenType.LBracket));
+        lex(']', (token) => expect(token.type).toBe(TokenType.RBracket));
+        lex('{', (token) => expect(token.type).toBe(TokenType.LBrace));
+        lex('}', (token) => expect(token.type).toBe(TokenType.RBrace));
+        lex(',', (token) => expect(token.type).toBe(TokenType.Comma));
+        lex(':', (token) => expect(token.type).toBe(TokenType.Colon));
+
+        lex('++', (token) => expect(token.type).toBe(TokenType.PlusPlus));
+        lex('+=', (token) => expect(token.type).toBe(TokenType.PlusEq));
+        lex('+', (token) => expect(token.type).toBe(TokenType.Plus));
+
+        lex('--', (token) => expect(token.type).toBe(TokenType.MinusMinus));
+        lex('-=', (token) => expect(token.type).toBe(TokenType.MinusEq));
+        lex('-', (token) => expect(token.type).toBe(TokenType.Minus));
+
+        lex('=>', (token) => expect(token.type).toBe(TokenType.RightArrow));
+
+        lex('===', (token) => expect(token.type).toBe(TokenType.EqEqEq));
+        lex('==', (token) => expect(token.type).toBe(TokenType.EqEq));
+        lex('=', (token) => expect(token.type).toBe(TokenType.Eq));
+
+        lex('!==', (token) => expect(token.type).toBe(TokenType.BangEqEq));
+        lex('!=', (token) => expect(token.type).toBe(TokenType.BangEq));
+        lex('!', (token) => expect(token.type).toBe(TokenType.Bang));
+
+        lex('&&', (token) => expect(token.type).toBe(TokenType.AmpAmp));
+        lex('&=', (token) => expect(token.type).toBe(TokenType.AmpEq));
+        lex('&', (token) => expect(token.type).toBe(TokenType.Amp));
+
+        lex('||', (token) => expect(token.type).toBe(TokenType.PipePipe));
+        lex('|=', (token) => expect(token.type).toBe(TokenType.PipeEq));
+        lex('|', (token) => expect(token.type).toBe(TokenType.Pipe));
+
+        lex('^=', (token) => expect(token.type).toBe(TokenType.CaretEq));
+        lex('^', (token) => expect(token.type).toBe(TokenType.Caret));
+
+        lex('~=', (token) => expect(token.type).toBe(TokenType.TildeEq));
+        lex('~', (token) => expect(token.type).toBe(TokenType.Tilde));
+
+        lex('**=', (token) => expect(token.type).toBe(TokenType.StarStarEq));
+        lex('**', (token) => expect(token.type).toBe(TokenType.StarStar));
+        lex('*=', (token) => expect(token.type).toBe(TokenType.StarEq));
+        lex('*', (token) => expect(token.type).toBe(TokenType.Star));
+
+        lex('/=', (token) => expect(token.type).toBe(TokenType.SlashEq));
+        lex('/', (token) => expect(token.type).toBe(TokenType.Slash));
+
+        lex('%=', (token) => expect(token.type).toBe(TokenType.PercentEq));
+        lex('%', (token) => expect(token.type).toBe(TokenType.Percent));
+
+        lex('<<=', (token) => expect(token.type).toBe(TokenType.LtLtEq));
+        lex('<<', (token) => expect(token.type).toBe(TokenType.LtLt));
+        lex('<=', (token) => expect(token.type).toBe(TokenType.LtEq));
+        lex('<', (token) => expect(token.type).toBe(TokenType.Lt));
+
+        lex('>>>=', (token) => expect(token.type).toBe(TokenType.GtGtGtEq));
+        lex('>>>', (token) => expect(token.type).toBe(TokenType.GtGtGt));
+        lex('>>=', (token) => expect(token.type).toBe(TokenType.GtGtEq));
+        lex('>>', (token) => expect(token.type).toBe(TokenType.GtGt));
+        lex('>=', (token) => expect(token.type).toBe(TokenType.GtEq));
+        lex('>', (token) => expect(token.type).toBe(TokenType.Gt));
+
+        lex('??=', (token) => expect(token.type).toBe(TokenType.QuestionQuestionEq));
+        lex('??', (token) => expect(token.type).toBe(TokenType.QuestionQuestion));
+        lex('?.', (token) => expect(token.type).toBe(TokenType.QuestionDot));
+        lex('?', (token) => expect(token.type).toBe(TokenType.Question));
     });
 });
