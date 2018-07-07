@@ -14,8 +14,8 @@ export {
     Error as ParserError,
 };
 
-type PrefixParsers = Map<TokenType.Any, Parselet.Prefix>;
-type InfixParsers = Map<TokenType.Any, Parselet.Infix>;
+type PrefixParsers = Map<TokenType.Any, Parselet.Prefix[]>;
+type InfixParsers = Map<TokenType.Any, Parselet.Infix[]>;
 type TokenSet = Set<TokenType.Any>;
 
 class ParserContext implements Parselet.Parser {
@@ -42,7 +42,7 @@ class ParserContext implements Parselet.Parser {
 
         let token = this.shift();
 
-        const parser = this.prefix.get(token.type);
+        const parser = this.getPrefix(token);
 
         if (parser === undefined) {
             throw new SyntaxError(Error.UnknownToken(token));
@@ -64,7 +64,7 @@ class ParserContext implements Parselet.Parser {
 
         while (true) {
 
-            const parser = this.infix.get(this.token.type);
+            const parser = this.getInfix(this.token);
 
             if (parser === undefined || precedence >= parser.precedence) {
                 break;
@@ -129,6 +129,28 @@ class ParserContext implements Parselet.Parser {
             this.lexer.next();
         }
     }
+
+    private getParser(registry: Map<TokenType.Any, any[]>, token: Token): any {
+        const parsers = registry.get(token.type) as ({ matches?: Parselet.MatchesFn }[] | undefined);
+        if (parsers) {
+            for (const parser of parsers) {
+                if (!parser.matches || parser.matches(this, token)) {
+                    return parser;
+                }
+            }
+        }
+        return undefined;
+    }
+
+    private getPrefix(token: Token): Parselet.Prefix | undefined {
+        const parser = this.getParser(this.prefix, token);
+        return parser ? (parser as Parselet.Prefix) : parser;
+    }
+
+    private getInfix(token: Token): Parselet.Infix | undefined {
+        const parser = this.getParser(this.infix, token);
+        return parser ? (parser as Parselet.Infix) : parser;
+    }
 }
 
 export abstract class Parser extends EventEmitter {
@@ -177,11 +199,17 @@ export abstract class Parser extends EventEmitter {
     }
 
     protected setPrefix(tokenType: TokenType.Any, parser: Parselet.Prefix) {
-        this.prefix.set(tokenType, parser);
+        if (!this.prefix.has(tokenType)) {
+            this.prefix.set(tokenType, []);
+        }
+        this.prefix.get(tokenType)!.push(parser);
     }
 
     protected setInfix(tokenType: TokenType.Any, parser: Parselet.Infix) {
-        this.infix.set(tokenType, parser);
+        if (!this.infix.has(tokenType)) {
+            this.infix.set(tokenType, []);
+        }
+        this.infix.get(tokenType)!.push(parser);
     }
 
     protected ignore(tokenType: TokenType.Any) {

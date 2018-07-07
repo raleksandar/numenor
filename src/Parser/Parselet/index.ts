@@ -77,18 +77,28 @@ export interface Parser {
     expect(tokenType: TokenType.Any): Token;
 }
 
-export interface Prefix {
-    (parser: Parser, token: Token, context?: any): Expr;
-}
-
 export type InfixFn = (parser: Parser, lhs: Expr, token: Token, context?: any) => Expr;
+export type PrefixFn = (parser: Parser, token: Token, context?: any) => Expr;
+export type MatchesFn = (parser: Parser, token: Token) => Boolean;
+
+export interface Prefix extends PrefixFn {
+    readonly matches?: MatchesFn;
+}
 
 export interface Infix extends InfixFn {
     readonly precedence: Precedence;
+    readonly matches?: MatchesFn;
 }
 
-export function makeInfix(parser: InfixFn, precedence: Precedence): Infix {
+export function makePrefix(parser: PrefixFn, matches?: MatchesFn): Prefix {
+    const parselet = parser as Prefix;
+    (parselet as {matches?: MatchesFn}).matches = matches;
+    return parselet;
+}
+
+export function makeInfix(parser: InfixFn, precedence: Precedence, matches?: MatchesFn): Infix {
     const parselet = parser as Infix;
     (parselet as {precedence: Precedence}).precedence = precedence;
+    (parselet as {matches?: MatchesFn}).matches = matches;
     return parselet;
 }
