@@ -1,5 +1,6 @@
 import { Token, TokenType, LexerError } from '../Lexer';
 import { ExpressionLexer } from '../ExpressionLexer';
+import { BooleanLiteral, NullLiteral, UndefinedLiteral } from '../Lexer/Token';
 
 describe('Lexer', () => {
 
@@ -236,5 +237,31 @@ describe('Lexer', () => {
         lex('??', (token) => expect(token.type).toBe(TokenType.QuestionQuestion));
         lex('?.', (token) => expect(token.type).toBe(TokenType.QuestionDot));
         lex('?', (token) => expect(token.type).toBe(TokenType.Question));
+    });
+
+    it('Parses keywords', () => {
+
+        lex('in', (token) => expect(token.type).toBe(TokenType.In));
+        lex('await', (token) => expect(token.type).toBe(TokenType.Await));
+
+        lex('true', (token) => {
+            expect(token.type).toBe(TokenType.BooleanLiteral);
+            expect((token as BooleanLiteral).value).toBe(true);
+        });
+
+        lex('false', (token) => {
+            expect(token.type).toBe(TokenType.BooleanLiteral);
+            expect((token as BooleanLiteral).value).toBe(false);
+        });
+
+        lex('null', (token) => {
+            expect(token.type).toBe(TokenType.NullLiteral);
+            expect((token as NullLiteral).value).toBe(null);
+        });
+
+        lex('undefined', (token) => {
+            expect(token.type).toBe(TokenType.UndefinedLiteral);
+            expect((token as UndefinedLiteral).value).toBe(undefined);
+        });
     });
 });
