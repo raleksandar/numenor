@@ -40,6 +40,16 @@ export interface Parser {
     accept(tokenType: TokenType.Any): boolean;
 
     /**
+     * Returns the token from the queue at the given offset.
+     * Note: this method does not mutate the queue or the parser state.
+     *
+     * @param {number} offset   Offset (from the current token) to return the token from.
+     * @returns {Token}
+     * @memberOf Parser
+     */
+    peek(offset: number): Token;
+
+    /**
      * Returns current token and then advances to the next token.
      *
      * @returns {Token}

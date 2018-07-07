@@ -35,11 +35,7 @@ class ParserContext implements Parselet.Parser {
     }
 
     get token(): Token {
-        if (this.queue.length > 0) {
-            return this.queue.shift()!;
-        }
-        this.skipIgnored();
-        return this.lexer.token;
+        return this.peek(0);
     }
 
     parse(precedence: Precedence.Any = 0): Expression.Any {
@@ -92,6 +88,19 @@ class ParserContext implements Parselet.Parser {
         return true;
     }
 
+    peek(offset: number = 0): Token {
+        while (this.queue.length <= offset) {
+            const token = this.lexer.shift();
+            if (token.type === TokenType.EOF) {
+                return token;
+            }
+            if (!this.ignored.has(token.type)) {
+                this.queue.push(token);
+            }
+        }
+        return this.queue[offset];
+    }
+
     shift(): Token {
         let token: Token;
         do {
@@ -100,7 +109,7 @@ class ParserContext implements Parselet.Parser {
             } else {
                 token = this.lexer.shift();
             }
-        } while (this.ignored.has(token.type as TokenType.Any));
+        } while (this.ignored.has(token.type));
         return token;
     }
 
