@@ -75,8 +75,8 @@ export class ExpressionLexer extends Lexer {
         this.appendScanner(makePunctuationScanner('<', TokenType.Lt));
 
         this.appendScanner(makeOperatorScanner('>>>=', TokenType.GtGtGtEq, TokenType.GtGtGt));
-        this.appendScanner(makePunctuationScanner('>>>', TokenType.GtGt));
-        this.appendScanner(makeOperatorScanner('>>=', TokenType.GtGtGtEq, TokenType.GtGtGt));
+        this.appendScanner(makePunctuationScanner('>>>', TokenType.GtGtGt));
+        this.appendScanner(makeOperatorScanner('>>=', TokenType.GtGtEq, TokenType.GtGt));
         this.appendScanner(makePunctuationScanner('>>', TokenType.GtGt));
         this.appendScanner(makeOperatorScanner('>=', TokenType.GtEq, TokenType.Gt));
         this.appendScanner(makePunctuationScanner('>', TokenType.Gt));
