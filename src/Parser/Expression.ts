@@ -120,6 +120,14 @@ export interface ComputedMemberAccess {
     readonly rhs: Any;
 }
 
+export type Argument = Identifier;
+
+export interface Lambda {
+    readonly type: typeof ExpressionType.Lambda;
+    readonly args: Argument[];
+    readonly body: Any;
+}
+
 export type Value = Number
     | String
     | Boolean
@@ -136,7 +144,8 @@ export type Primary = Value
     | Call
     | Await
     | MemberAccess
-    | ComputedMemberAccess;
+    | ComputedMemberAccess
+    | Lambda;
 
 export type Any = Primary
     | BinaryOperation

@@ -13,6 +13,7 @@ import { Group } from './Parser/Parselet/Group';
 import { ArrayLiteral } from './Parser/Parselet/ArrayLiteral';
 import { ObjectLiteral } from './Parser/Parselet/ObjectLiteral';
 import { Await } from './Parser/Parselet/Await';
+import { LambdaPrefix, LambdaInfix } from './Parser/Parselet/Lambda';
 
 export class ExpressionParser extends Parser {
 
@@ -93,6 +94,9 @@ export class ExpressionParser extends Parser {
         this.setInfix(TokenType.LParen, Call);
         this.setInfix(TokenType.QuestionDot, NullConditional);
 
+        this.setInfix(TokenType.RightArrow, LambdaInfix);
+
+        this.setPrefix(TokenType.LParen, LambdaPrefix);
         this.setPrefix(TokenType.LParen, Group);
 
         this.setPrefix(TokenType.Identifier, Identifier);
