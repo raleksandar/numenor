@@ -401,4 +401,12 @@ describe('ExpressionEvaluator', () => {
         expect(fn.tag).toBe('foo');
         expect(fn()).toBe(5);
     });
+
+    it('Evaluates lambda expressions', () => {
+        expect($eval('() => undefined')).toBeInstanceOf(Function);
+        expect($eval('x => x * x')(16)).toBe(256);
+        expect($eval('(x, y) => x * y')(16, 2)).toBe(32);
+        expect($compile('[1, 2, 3].map(x => x * 2)', { NoProtoAccess: false })()).toEqual([2, 4, 6]);
+        expect($eval('x => y => x + y')('foo')('bar')).toBe('foobar');
+    });
 });

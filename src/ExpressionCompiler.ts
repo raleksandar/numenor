@@ -13,6 +13,7 @@ import { Sequence } from './Compiler/Evaluator/Sequence';
 import { Value } from './Compiler/Evaluator/Value';
 import { StackPush, StackPop, StackRef } from './Compiler/Evaluator/Stack';
 import { Await } from './Compiler/Evaluator/Await';
+import { Lambda } from './Compiler/Evaluator/Lambda';
 
 export class ExpressionCompiler extends Compiler {
 
@@ -39,5 +40,6 @@ export class ExpressionCompiler extends Compiler {
         this.setCompiler(ExpressionType.BooleanLiteral, Value);
         this.setCompiler(ExpressionType.NullLiteral, Value);
         this.setCompiler(ExpressionType.UndefinedLiteral, Value);
+        this.setCompiler(ExpressionType.Lambda, Lambda);
     }
 }
