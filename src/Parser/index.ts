@@ -160,16 +160,18 @@ export abstract class Parser extends EventEmitter {
     private readonly prefix: PrefixParsers;
     private readonly infix: InfixParsers;
     private readonly ignored: TokenSet;
+    private lexerState: LexerState;
 
     constructor(private readonly lexer: Lexer) {
         super();
         this.prefix = new Map();
         this.infix = new Map();
         this.ignored = new Set();
+        this.lexerState = this.lexer.currentState;
     }
 
     get state(): LexerState {
-        return this.lexer.currentState;
+        return this.lexerState;
     }
 
     parse(input: string, state?: LexerState, exhaustive = true): Expression.Any {
@@ -194,6 +196,9 @@ export abstract class Parser extends EventEmitter {
         if (exhaustive && !parserContext.match(TokenType.EOF)) {
             throw new SyntaxError(Error.UnknownToken(parserContext.token));
         }
+
+        const { offset, line, col } = parserContext.shift();
+        this.lexerState = { offset, line, col };
 
         return expression;
     }
