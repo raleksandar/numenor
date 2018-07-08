@@ -409,4 +409,11 @@ describe('ExpressionEvaluator', () => {
         expect($compile('[1, 2, 3].map(x => x * 2)', { NoProtoAccess: false })()).toEqual([2, 4, 6]);
         expect($eval('x => y => x + y')('foo')('bar')).toBe('foobar');
     });
+
+    it('Evaluates lambda expressions with optional arguments', () => {
+        const lambda = $eval('(x, y = 2) => x * y');
+        expect(lambda(16)).toBe(32);
+        expect(lambda(16, 3)).toBe(48);
+        expect($eval('(x, y = x * 2) => x * y')(16)).toBe(512);
+    });
 });

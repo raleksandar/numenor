@@ -20,6 +20,7 @@ export const Sequence = Symbol.for('numenor:expr:sequence');
 export const MemberAccess = Symbol.for('numenor:expr:access');
 export const ComputedMemberAccess = Symbol.for('numenor:expr:computed_access');
 export const Lambda = Symbol.for('numenor:expr:lambda');
+export const Group = Symbol.for('numenor:expr:group');
 
 export type Value = typeof NumberLiteral
     | typeof StringLiteral
@@ -40,7 +41,8 @@ export type Primary = Value
     | typeof Await
     | typeof MemberAccess
     | typeof ComputedMemberAccess
-    | typeof Lambda;
+    | typeof Lambda
+    | typeof Group;
 
 export type Any = Primary
     | typeof Assignment

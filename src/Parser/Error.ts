@@ -14,3 +14,4 @@ export const UnexpectedToken = (tokenType: TokenType.Any, { lexeme, line, col }:
 );
 
 export const InvalidLeftHandSide = `Invalid left-hand side in assignment`;
+export const InvalidArgumentList = `Invalid argument list in lambda expression`;

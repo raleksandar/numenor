@@ -8,17 +8,28 @@ export const Lambda: EvaluatorFactory = (expr, options, compile) => {
         throw new TypeError(UnknownExpression(expr));
     }
 
-    const { length } = expr.args;
     const body = compile(expr.body, options, compile);
 
-    const isConst = hasConstValue(body);
-    const isAsync = hasAsyncValue(body);
+    let isConst = hasConstValue(body);
+    let isAsync = hasAsyncValue(body);
+
+    const args = expr.args.map((arg) => {
+        const defaultValue = compile(arg.default, options, compile);
+        isConst = !isConst && hasConstValue(defaultValue);
+        isAsync = !isAsync && hasAsyncValue(defaultValue);
+        return {
+            name: arg.name,
+            defaultValue,
+        };
+    });
 
     return mark({ isAsync, isConst }, (context, stack) => {
-        return (...args: any[]) => {
+        return (...params: any[]) => {
             const invocationContext = { ...context };
-            for (let i = 0; i < length; i++) {
-                invocationContext[expr.args[i].name] = i < length ? args[i] : undefined;
+            for (let i = 0; i < args.length; i++) {
+                invocationContext[args[i].name] = i < params.length ?
+                    params[i] :
+                    invocationContext[args[i].name] = args[i].defaultValue(invocationContext, stack);
             }
             return body(invocationContext, stack);
         };

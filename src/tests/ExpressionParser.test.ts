@@ -115,7 +115,7 @@ describe('ExpressionParser', () => {
         const squareAST = {
             type: ExpressionType.Lambda,
             args: [
-                { type: ExpressionType.Identifier, name: 'x' },
+                { name: 'x', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
             ],
             body: {
                 type: ExpressionType.BinaryOperation,
@@ -133,7 +133,6 @@ describe('ExpressionParser', () => {
 
         expect(parser.parse('x => x ** 2')).toEqual(squareAST);
         expect(parser.parse('(x) => x ** 2')).toEqual(squareAST);
-        expect(parser.parse('(x,) => x ** 2')).toEqual(squareAST);
 
         expect(parser.parse('() => 2')).toEqual({
             type: ExpressionType.Lambda,
@@ -144,13 +143,13 @@ describe('ExpressionParser', () => {
         expect(parser.parse('(fn, x) => (y) => fn(x, y)')).toEqual({
             type: ExpressionType.Lambda,
             args: [
-                { type: ExpressionType.Identifier, name: 'fn' },
-                { type: ExpressionType.Identifier, name: 'x' },
+                { name: 'fn', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
+                { name: 'x', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
             ],
             body: {
                 type: ExpressionType.Lambda,
                 args: [
-                    { type: ExpressionType.Identifier, name: 'y' },
+                    { name: 'y', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
                 ],
                 body: {
                     type: ExpressionType.Call,
@@ -166,19 +165,19 @@ describe('ExpressionParser', () => {
         expect(parser.parse('x => y => (a, b, c) => x, a, b, c, y')).toEqual({
             type: ExpressionType.Lambda,
             args: [
-                { type: ExpressionType.Identifier, name: 'x' },
+                { name: 'x', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
             ],
             body: {
                 type: ExpressionType.Lambda,
                 args: [
-                    { type: ExpressionType.Identifier, name: 'y' },
+                    { name: 'y', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
                 ],
                 body: {
                     type: ExpressionType.Lambda,
                     args: [
-                        { type: ExpressionType.Identifier, name: 'a' },
-                        { type: ExpressionType.Identifier, name: 'b' },
-                        { type: ExpressionType.Identifier, name: 'c' },
+                        { name: 'a', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
+                        { name: 'b', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
+                        { name: 'c', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
                     ],
                     body: {
                         type: ExpressionType.Sequence,

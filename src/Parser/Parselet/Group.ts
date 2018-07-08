@@ -1,4 +1,5 @@
 import { Prefix } from './';
+import { ExpressionType } from '../';
 import { TokenType } from '../../Lexer';
 import { UnknownToken } from '../Error';
 
@@ -8,7 +9,15 @@ export const Group: Prefix = (parser, token) => {
         throw new SyntaxError(UnknownToken(token));
     }
 
+    if (parser.accept(TokenType.RParen)) {
+        return { type: ExpressionType.Group };
+    }
+
     const expression = parser.parse();
     parser.expect(TokenType.RParen);
-    return expression;
+
+    return {
+        type: ExpressionType.Group,
+        expression,
+    };
 };
