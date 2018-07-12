@@ -162,7 +162,7 @@ describe('ExpressionParser', () => {
             },
         });
 
-        expect(parser.parse('x => y => (a, b, c) => x, a, b, c, y')).toEqual({
+        expect(parser.parse('x => y => (a, b, c) => (x, a, b, c, y)')).toEqual({
             type: ExpressionType.Lambda,
             args: [
                 { name: 'x', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },

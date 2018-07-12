@@ -3,6 +3,7 @@ import { TokenType } from '../../Lexer';
 import { UnexpectedToken, InvalidArgumentList } from '../Error';
 import { Argument } from '../Expression';
 import { Precedence, ExpressionType } from '../';
+import { Assignment as AssignmentPrecedence } from '../Precedence';
 
 const lambda: InfixFn = (parser, lhs, token) => {
 
@@ -48,7 +49,7 @@ const lambda: InfixFn = (parser, lhs, token) => {
     return {
         type: ExpressionType.Lambda,
         args,
-        body: parser.parse(),
+        body: parser.parse(AssignmentPrecedence - 1),
     };
 };
 
