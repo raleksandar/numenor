@@ -1,4 +1,4 @@
-import { hasConstValue, hasAsyncValue, EvaluatorFactory, mark } from './';
+import { hasConstValue, hasAsyncValue, EvaluatorFactory, mark, InternalEvaluator } from './';
 import { ExpressionType } from '../../Parser';
 import { UnknownExpression } from '../Error';
 
@@ -14,11 +14,19 @@ export const Lambda: EvaluatorFactory = (expr, options, compile) => {
     let isAsync = hasAsyncValue(body);
 
     const args = expr.args.map((arg) => {
-        const defaultValue = compile(arg.default, options, compile);
-        isConst = !isConst && hasConstValue(defaultValue);
-        isAsync = !isAsync && hasAsyncValue(defaultValue);
+        let defaultValue: InternalEvaluator;
+        if (arg.variadic) {
+            defaultValue = () => [];
+        } else if (arg.default) {
+            defaultValue = compile(arg.default, options, compile);
+            isConst = !isConst && hasConstValue(defaultValue);
+            isAsync = !isAsync && hasAsyncValue(defaultValue);
+        } else {
+            defaultValue = () => undefined;
+        }
         return {
             name: arg.name,
+            variadic: !!arg.variadic,
             defaultValue,
         };
     });
@@ -27,9 +35,13 @@ export const Lambda: EvaluatorFactory = (expr, options, compile) => {
         return (...params: any[]) => {
             const invocationContext = { ...context };
             for (let i = 0; i < args.length; i++) {
-                invocationContext[args[i].name] = i < params.length ?
-                    params[i] :
-                    invocationContext[args[i].name] = args[i].defaultValue(invocationContext, stack);
+                if (args[i].variadic) {
+                    invocationContext[args[i].name] = params.slice(i);
+                } else {
+                    invocationContext[args[i].name] = i < params.length ?
+                        params[i] :
+                        args[i].defaultValue(invocationContext, stack);
+                }
             }
             return body(invocationContext, stack);
         };

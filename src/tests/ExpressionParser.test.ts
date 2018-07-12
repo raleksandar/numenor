@@ -115,7 +115,7 @@ describe('ExpressionParser', () => {
         const squareAST = {
             type: ExpressionType.Lambda,
             args: [
-                { name: 'x', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
+                { name: 'x' },
             ],
             body: {
                 type: ExpressionType.BinaryOperation,
@@ -143,13 +143,13 @@ describe('ExpressionParser', () => {
         expect(parser.parse('(fn, x) => (y) => fn(x, y)')).toEqual({
             type: ExpressionType.Lambda,
             args: [
-                { name: 'fn', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
-                { name: 'x', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
+                { name: 'fn' },
+                { name: 'x' },
             ],
             body: {
                 type: ExpressionType.Lambda,
                 args: [
-                    { name: 'y', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
+                    { name: 'y' },
                 ],
                 body: {
                     type: ExpressionType.Call,
@@ -165,31 +165,70 @@ describe('ExpressionParser', () => {
         expect(parser.parse('x => y => (a, b, c) => (x, a, b, c, y)')).toEqual({
             type: ExpressionType.Lambda,
             args: [
-                { name: 'x', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
+                { name: 'x' },
             ],
             body: {
                 type: ExpressionType.Lambda,
                 args: [
-                    { name: 'y', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
+                    { name: 'y' },
                 ],
                 body: {
                     type: ExpressionType.Lambda,
                     args: [
-                        { name: 'a', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
-                        { name: 'b', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
-                        { name: 'c', default: { type: ExpressionType.UndefinedLiteral, value: undefined } },
+                        { name: 'a' },
+                        { name: 'b' },
+                        { name: 'c' },
                     ],
                     body: {
-                        type: ExpressionType.Sequence,
-                        expressions: [
-                            { type: ExpressionType.Identifier, name: 'x' },
-                            { type: ExpressionType.Identifier, name: 'a' },
-                            { type: ExpressionType.Identifier, name: 'b' },
-                            { type: ExpressionType.Identifier, name: 'c' },
-                            { type: ExpressionType.Identifier, name: 'y' },
-                        ],
+                        type: ExpressionType.Group,
+                        expression: {
+                            type: ExpressionType.Sequence,
+                            expressions: [
+                                { type: ExpressionType.Identifier, name: 'x' },
+                                { type: ExpressionType.Identifier, name: 'a' },
+                                { type: ExpressionType.Identifier, name: 'b' },
+                                { type: ExpressionType.Identifier, name: 'c' },
+                                { type: ExpressionType.Identifier, name: 'y' },
+                            ],
+                        },
                     },
                 },
+            },
+        });
+    });
+
+    it('Parses lambda expression with default argument values', () => {
+
+        expect(parser.parse('(x = 2) => x')).toEqual({
+            type: ExpressionType.Lambda,
+            args: [
+                { name: 'x', default: { type: ExpressionType.NumberLiteral, value: 2 } },
+            ],
+            body: {
+                type: ExpressionType.Identifier,
+                name: 'x',
+            },
+        });
+    });
+
+    it('Parses lambda expression with the rest argument', () => {
+
+        expect(parser.parse('(...numbers) => numbers.reduce(sum, 0)')).toEqual({
+            type: ExpressionType.Lambda,
+            args: [
+                { name: 'numbers', variadic: true },
+            ],
+            body: {
+                type: ExpressionType.Call,
+                lhs: {
+                    type: ExpressionType.MemberAccess,
+                    lhs: { type: ExpressionType.Identifier, name: 'numbers' },
+                    name: 'reduce',
+                },
+                args: [
+                    { type: ExpressionType.Identifier, name: 'sum' },
+                    { type: ExpressionType.NumberLiteral, value: 0 },
+                ],
             },
         });
     });

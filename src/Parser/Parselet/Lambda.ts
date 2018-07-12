@@ -25,14 +25,10 @@ const lambda: InfixFn = (parser, lhs, token) => {
         throw new SyntaxError(InvalidArgumentList);
     }
 
-    const args = paramList.map((expr): Argument => {
+    const args = paramList.map((expr, index): Argument => {
         if (expr.type === ExpressionType.Identifier) {
             return {
                 name: expr.name,
-                default: {
-                    type: ExpressionType.UndefinedLiteral,
-                    value: undefined,
-                },
             };
         }
         if (expr.type === ExpressionType.Assignment &&
@@ -41,6 +37,15 @@ const lambda: InfixFn = (parser, lhs, token) => {
             return {
                 name: expr.lhs.name,
                 default: expr.rhs,
+            };
+        }
+        if (expr.type === ExpressionType.Spread &&
+            expr.rhs.type === ExpressionType.Identifier &&
+            index === paramList.length - 1
+        ) {
+            return {
+                name: expr.rhs.name,
+                variadic: true,
             };
         }
         throw new SyntaxError(InvalidArgumentList);

@@ -122,7 +122,8 @@ export interface ComputedMemberAccess {
 
 export interface Argument {
     readonly name: string;
-    readonly default: Any;
+    readonly default?: Any;
+    readonly variadic?: boolean;
 }
 
 export interface Lambda {

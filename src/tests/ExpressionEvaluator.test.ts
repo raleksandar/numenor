@@ -416,4 +416,14 @@ describe('ExpressionEvaluator', () => {
         expect(lambda(16, 3)).toBe(48);
         expect($eval('(x, y = x * 2) => x * y')(16)).toBe(512);
     });
+
+    it('Evaluates lambda expressions with rest arguments', () => {
+        const lambda = $compile(
+            '(n, ...numbers) => numbers.reduce((x, sum) => sum + x * n, 0)',
+            { NoProtoAccess: false }
+        )();
+        expect(lambda(2, 1, 2, 3)).toBe(11);
+        expect(lambda(2, 42)).toBe(42);
+        expect(lambda(2)).toBe(0);
+    });
 });
