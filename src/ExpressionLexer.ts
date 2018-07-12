@@ -18,7 +18,9 @@ export class ExpressionLexer extends Lexer {
         this.appendScanner(StringLiteral);
         this.appendScanner(NumberLiteral);
 
+        this.appendScanner(makePunctuationScanner('...', TokenType.Ellipsis));
         this.appendScanner(makePunctuationScanner('.', TokenType.Dot));
+
         this.appendScanner(makePunctuationScanner('(', TokenType.LParen));
         this.appendScanner(makePunctuationScanner(')', TokenType.RParen));
         this.appendScanner(makePunctuationScanner('[', TokenType.LBracket));

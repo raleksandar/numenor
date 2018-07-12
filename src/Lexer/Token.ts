@@ -294,6 +294,10 @@ export interface RightArrow extends Token {
     readonly type: typeof TokenType.RightArrow;
 }
 
+export interface Ellipsis extends Token {
+    readonly type: typeof TokenType.Ellipsis;
+}
+
 export type Any = Unknown
     | Invalid
     | EOF
@@ -360,4 +364,5 @@ export type Any = Unknown
     | QuestionDot
     | QuestionQuestion
     | QuestionQuestionEq
-    | RightArrow;
+    | RightArrow
+    | Ellipsis;

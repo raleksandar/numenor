@@ -168,7 +168,9 @@ describe('Lexer', () => {
 
     it('Parses punctuation operators', () => {
 
+        lex('...', (token) => expect(token.type).toBe(TokenType.Ellipsis));
         lex('.', (token) => expect(token.type).toBe(TokenType.Dot));
+
         lex('(', (token) => expect(token.type).toBe(TokenType.LParen));
         lex(')', (token) => expect(token.type).toBe(TokenType.RParen));
         lex('[', (token) => expect(token.type).toBe(TokenType.LBracket));
