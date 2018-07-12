@@ -136,6 +136,11 @@ export interface Group {
     readonly expression?: Any;
 }
 
+export interface Spread {
+    readonly type: typeof ExpressionType.Spread;
+    readonly rhs: Any;
+}
+
 export type Value = Number
     | String
     | Boolean
@@ -154,7 +159,8 @@ export type Primary = Value
     | MemberAccess
     | ComputedMemberAccess
     | Lambda
-    | Group;
+    | Group
+    | Spread;
 
 export type Any = Primary
     | BinaryOperation

@@ -15,6 +15,7 @@ import { StackPush, StackPop, StackRef } from './Compiler/Evaluator/Stack';
 import { Await } from './Compiler/Evaluator/Await';
 import { Lambda } from './Compiler/Evaluator/Lambda';
 import { Group } from './Compiler/Evaluator/Group';
+import { Spread } from './Compiler/Evaluator/Spread';
 
 export class ExpressionCompiler extends Compiler {
 
@@ -43,5 +44,6 @@ export class ExpressionCompiler extends Compiler {
         this.setCompiler(ExpressionType.UndefinedLiteral, Value);
         this.setCompiler(ExpressionType.Lambda, Lambda);
         this.setCompiler(ExpressionType.Group, Group);
+        this.setCompiler(ExpressionType.Spread, Spread);
     }
 }
