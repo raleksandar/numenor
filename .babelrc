@@ -3,26 +3,21 @@
         [
             "@babel/env",
             {
-                "targets": {
-                    "node": "current"
-                }
+                "targets": "ie 11"
             }
         ],
-        "@babel/stage-3",
         "@babel/typescript"
     ],
     "plugins": [
-        [
-            "module-resolver",
-            {
-                "extensions": [
-                    ".js",
-                    ".ts"
-                ],
-                "root": [
-                    "./src"
-                ]
-            }
-        ]
+        ["@babel/plugin-proposal-class-properties", { "loose": false }],
+        ["module-resolver", {
+            "extensions": [
+                ".js",
+                ".ts"
+            ],
+            "root": [
+                "./src"
+            ]
+        }],
     ]
 }

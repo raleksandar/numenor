@@ -6,7 +6,7 @@
         "baseUrl": "./",
         "rootDir": "./",
         "module": "es2015",
-        "target": "esnext",
+        "target": "es5",
         "noUnusedLocals": true,
         "strict": true,
         "noImplicitReturns": true,
